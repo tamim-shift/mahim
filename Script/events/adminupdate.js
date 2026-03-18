@@ -2,7 +2,7 @@ module.exports.config = {
 	name: "adminUpdate",
 	eventType: ["log:thread-admins","log:thread-name", "log:user-nickname","log:thread-icon","log:thread-call","log:thread-color"],
 	version: "1.0.1",
-	credits: "𝗜𝘀𝗹𝗮𝗺𝗶𝗰𝗸 𝗰𝗵𝗮𝘁 𝗯𝗼𝘁",
+	credits: "MAHIM ISLAM",
 	description: "Update team information quickly",
     envConfig: {
         sendNoti: true,
@@ -25,7 +25,7 @@ module.exports.run = async function ({ event, api, Threads,Users }) {
             case "log:thread-admins": {
                 if (logMessageData.ADMIN_EVENT == "add_admin") {
                     dataThread.adminIDs.push({ id: logMessageData.TARGET_ID })
-                    if (global.configModule[this.config.name].sendNoti) api.sendMessage(`»» NOTICE «« Update user ${logMessageData.TARGET_ID} এই নে বলদ তোরে গ্রুপে এড়মিন দিলাম 😁🫵🏾`, threadID, async (error, info) => {
+                    if (global.configModule[this.config.name].sendNoti) api.sendMessage(`"${logMessageData.TARGET_ID}" - 𝐄𝐢𝐢 𝐧𝐞 𝐛𝐨𝐥𝐨𝐝 𝐭𝐨𝐫𝐞 𝐠𝐫𝐨𝐮𝐩 𝐞𝐫 𝐚𝐝𝐦𝐢𝐧 𝐝𝐢𝐥𝐚𝐦! ʕ•ᴥ•ʔ`, threadID, async (error, info) => {
                         if (global.configModule[this.config.name].autoUnsend) {
                             await new Promise(resolve => setTimeout(resolve, global.configModule[this.config.name].timeToUnsend * 1000));
                             return api.unsendMessage(info.messageID);
@@ -34,7 +34,7 @@ module.exports.run = async function ({ event, api, Threads,Users }) {
                 }
                 else if (logMessageData.ADMIN_EVENT == "remove_admin") {
                     dataThread.adminIDs = dataThread.adminIDs.filter(item => item.id != logMessageData.TARGET_ID);
-                    if (global.configModule[this.config.name].sendNoti) api.sendMessage(`»» NOTICE «« Update user ${logMessageData.TARGET_ID} তুই পাগল ছাগল এড়মিন হওয়ার যোগ্য না \n তাই তোকে এড়মিন থেকে লাথি মেরে নামিয়ে দেওয়া হলো|`, threadID, async (error, info) => {
+                    if (global.configModule[this.config.name].sendNoti) api.sendMessage(`"${logMessageData.TARGET_ID}" - 𝐓𝐮𝐢𝐢 𝐩𝐚𝐠𝐨𝐥 𝐜𝐡𝐚𝐠𝐨𝐥, 𝐠𝐫𝐨𝐮𝐩 𝐞𝐫 𝐚𝐝𝐦𝐢𝐧 𝐭𝐡𝐚𝐤𝐚𝐫 𝐣𝐨𝐠𝐠𝐨𝐭𝐚 𝐧𝐞𝐢𝐢!\n𝐓𝐚𝐢 𝐭𝐨𝐤𝐞 𝐚𝐝𝐦𝐢𝐧 𝐭𝐡𝐞𝐤𝐞 𝐥𝐚𝐭𝐡𝐢 𝐦𝐞𝐫𝐞 𝐧𝐚𝐦𝐢𝐲𝐞 𝐝𝐞𝐮𝐲𝐚 𝐡𝐨𝐥𝐨! 😒 `, threadID, async (error, info) => {
                         if (global.configModule[this.config.name].autoUnsend) {
                             await new Promise(resolve => setTimeout(resolve, global.configModule[this.config.name].timeToUnsend * 1000));
                             return api.unsendMessage(info.messageID);
