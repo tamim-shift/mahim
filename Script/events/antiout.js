@@ -2,7 +2,7 @@ module.exports.config = {
  name: "antiout",
  eventType: ["log:unsubscribe"],
  version: "0.0.1",
- credits: "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
+ credits: "MAHIM ISLAM",
  description: "Listen events"
 };
 
@@ -15,8 +15,8 @@ module.exports.run = async({ event, api, Threads, Users }) => {
  if (type == "self-separation") {
   api.addUserToGroup(event.logMessageData.leftParticipantFbId, event.threadID, (error, info) => {
    if (error) {
-    api.sendMessage(`সরি বস আবালরে এড় করতে পারলাম না \n ${name} এই আবালরে ব্লক করছে অথবা তার আইডিতে মেসেঞ্জার অপশন তাই এড করতে পারলাম না😞 \n\n ──────·····✦·····──── \n 𝗜𝘀𝗹𝗮𝗺𝗶𝗰𝗸 𝗰𝗵𝗮𝘁 𝗯𝗼𝘁 | ᵁᴸᴸ⁴ˢᴴ `, event.threadID)
-   } else api.sendMessage(`শোন, ${name} এই গ্রুপ হইলো গ্যাং! \n এখান থেকে যাইতে হইলে এড়মিনের ক্লিয়ারেন্স লাগে! \nতুই পারমিশন ছাড়া লিভ নিছোস – তোকে আবার মাফিয়া স্টাইলে এড় দিলাম। \n\n ── ·······✦·······──── \n 𝗜𝘀𝗹𝗮𝗺𝗶𝗰𝗸 𝗰𝗵𝗮𝘁 𝗯𝗼𝘁 | ᵁᴸᴸ⁴ˢᴴ `, event.threadID);
+    api.sendMessage(`𝐎𝐨𝐩𝐬! 𝐬𝐨𝐫𝐫𝐲 𝐛𝐨𝐬𝐬 𝐈 𝐜𝐚𝐧'𝐭 𝐫𝐞-𝐚𝐝𝐝 ${name} to the group...! 🥲`, event.threadID)
+   } else api.sendMessage(`𝐑𝐞-𝐚𝐝𝐝𝐞𝐝 ${name} 𝐭𝐨 𝐭𝐡𝐞 𝐠𝐫𝐨𝐮𝐩...! 🙂`, event.threadID);
   })
  }
 }
