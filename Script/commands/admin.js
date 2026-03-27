@@ -1,14 +1,11 @@
-const axios = require("axios");
-const request = require("request");
-const fs = require("fs-extra");
 const moment = require("moment-timezone");
 
 module.exports.config = {
     name: "admin",
-    version: "1.0.0",
+    version: "1.0.1",
     hasPermssion: 0,
     credits: "MAHIM ISLAM",
-    description: "Show Owner Info",
+    description: "Show Owner Info (No Image)",
     commandCategory: "info",
     usages: "",
     cooldowns: 5
@@ -17,7 +14,7 @@ module.exports.config = {
 module.exports.run = async function({ api, event }) {
     var time = moment().tz("Asia/Dhaka").format("DD/MM/YYYY hh:mm:ss A");
 
-    var callback = () => api.sendMessage({
+    return api.sendMessage({
         body: `
 ┏━━━━━━━━━━━━━━━━━━━━━┓
 ┃      🌟 𝗢𝗪𝗡𝗘𝗥 𝗜𝗡𝗙𝗢 🌟      
@@ -36,11 +33,6 @@ module.exports.run = async function({ api, event }) {
 ┣━━━━━━━━━━━━━━━━━━━━━┫
 ┃ 🕒 𝐔𝐩𝐝𝐚𝐭𝐞𝐝 𝐓𝐢𝐦𝐞:  ${time}
 ┗━━━━━━━━━━━━━━━━━━━━━┛
-        `,
-        attachment: fs.createReadStream(__dirname + "/cache/1.png")
-    }, event.threadID, () => fs.unlinkSync(__dirname + "/cache/1.png"));
-  
-    return request(encodeURI(`https://i.ibb.co/ymqmV7Bz/IMG-20251001-152900.jpg`))
-        .pipe(fs.createWriteStream(__dirname + '/cache/1.png'))
-        .on('close', () => callback());
+        `
+    }, event.threadID);
 };
