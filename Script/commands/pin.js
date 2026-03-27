@@ -1,39 +1,79 @@
-module.exports.config = {
- name: "pin",
- version: "1.0.0",
- hasPermssion: 0,
- credits: "MAHBUB SHAON",
- description: "Image search",
- commandCategory: "Search",
- usages: "[Text]",
- cooldowns: 0,
-};
-module.exports.run = async function({ api, event, args }) {
- const axios = require("axios");
- const fs = require("fs-extra");
- const request = require("request");
- const keySearch = args.join(" ");
- const apis = await axios.get('https://raw.githubusercontent.com/shaonproject/Shaon/main/api.json')
- const Shaon = apis.data.api
- 
- if(keySearch.includes("-") == false) return api.sendMessage('Please enter in the format, example: pic mia khalifa-10 (it depends on you how many images you want to appear in the result) credit by —͟͟͞͞𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️', event.threadID, event.messageID)
- const keySearchs = keySearch.substr(0, keySearch.indexOf('-'))
- const numberSearch = keySearch.split("-").pop() || 6
- const res = await axios.get(`${Shaon}/pinterest?search=${encodeURIComponent(keySearchs)}`);
- const data = res.data.data;
- var num = 0;
- var imgData = [];
- for (var i = 0; i < parseInt(numberSearch); i++) {
- let path = __dirname + `/cache/${num+=1}.jpg`;
- let getDown = (await axios.get(`${data[i]}`, { responseType: 'arraybuffer' })).data;
- fs.writeFileSync(path, Buffer.from(getDown, 'utf-8'));
- imgData.push(fs.createReadStream(__dirname + `/cache/${num}.jpg`));
- }
- api.sendMessage({
- attachment: imgData,
- body: numberSearch + ' Searching 🔎 results for you. Your keyword: '+ keySearchs
- }, event.threadID, event.messageID)
- for (let ii = 1; ii < parseInt(numberSearch); ii++) {
- fs.unlinkSync(__dirname + `/cache/${ii}.jpg`)
- }
+module.exports.config = {  
+  name: "pin",  
+  version: "2.0.0",  
+  hasPermssion: 0,  
+  credits: "MAHIM ISLAM (Updated by ChatGPT)",  
+  description: "Pinterest Image Search (No duplicate + default 2 images)",  
+  commandCategory: "Search",  
+  usages: "[text]-[number] (optional)",  
+  cooldowns: 3,  
+};  
+
+module.exports.run = async function({ api, event, args }) {  
+  const axios = require("axios");  
+  const fs = require("fs-extra");  
+
+  try {  
+    if (!args[0])  
+      return api.sendMessage("❌ Please enter a search keyword!", event.threadID, event.messageID);  
+
+    const input = args.join(" ");  
+
+    // Split keyword & number (optional)
+    let keyword = input;  
+    let limit = 2; // default
+
+    if (input.includes("-")) {  
+      keyword = input.substring(0, input.lastIndexOf("-")).trim();  
+      limit = parseInt(input.split("-").pop());  
+      if (isNaN(limit) || limit <= 0) limit = 2;  
+    }  
+
+    // Limit max images (prevent spam)
+    if (limit > 50) limit = 50;  
+
+    // Get API base
+    const apis = await axios.get('https://raw.githubusercontent.com/shaonproject/Shaon/main/api.json');  
+    const baseApi = apis.data.api;  
+
+    // Fetch images
+    const res = await axios.get(`${baseApi}/pinterest?search=${encodeURIComponent(keyword)}`);  
+    let data = res.data.data || [];  
+
+    if (!data.length)  
+      return api.sendMessage("❌ No images found!", event.threadID, event.messageID);  
+
+    // Remove duplicate URLs
+    data = [...new Set(data)];  
+
+    // Shuffle (to avoid same order every time)
+    data.sort(() => 0.5 - Math.random());  
+
+    // Adjust limit if not enough images
+    if (data.length < limit) limit = data.length;  
+
+    let imgData = [];  
+
+    for (let i = 0; i < limit; i++) {  
+      const path = __dirname + `/cache/pin_${i}.jpg`;  
+      const img = (await axios.get(data[i], { responseType: "arraybuffer" })).data;  
+      fs.writeFileSync(path, Buffer.from(img));  
+      imgData.push(fs.createReadStream(path));  
+    }  
+
+    api.sendMessage({  
+      body: `🔎 Found ${limit} images for: ${keyword}`,  
+      attachment: imgData  
+    }, event.threadID, event.messageID, () => {  
+      // Clean cache after send
+      for (let i = 0; i < limit; i++) {  
+        const path = __dirname + `/cache/pin_${i}.jpg`;  
+        if (fs.existsSync(path)) fs.unlinkSync(path);  
+      }  
+    });  
+
+  } catch (err) {  
+    console.error(err);  
+    api.sendMessage("❌ Error fetching images!", event.threadID, event.messageID);  
+  }  
 };
