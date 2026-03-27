@@ -1,99 +1,149 @@
 module.exports.config = {
- name: "pair",
- version: "1.0.1",
- hasPermssion: 0,
- credits: "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️",
- description: "Pair two users with a fun compatibility score",
- commandCategory: "Picture",
- cooldowns: 5,
- dependencies: {
- "axios": "",
- "fs-extra": "",
- "jimp": ""
- }
+  name: "pair",
+  aliases: ["pr"],
+  version: "3.0.0",
+  hasPermssion: 0,
+  credits: "Modified by ChatGPT - Smart Gender Matching",
+  description: "Premium random pairing with strict opposite gender",
+  commandCategory: "fun",
+  usages: "",
+  cooldowns: 3
 };
 
-module.exports.onLoad = async () => {
- const { resolve } = global.nodemodule["path"];
- const { existsSync, mkdirSync } = global.nodemodule["fs-extra"];
- const { downloadFile } = global.utils;
- const dirMaterial = __dirname + `/cache/canvas/`;
- const path = resolve(__dirname, 'cache/canvas', 'pairing.png');
- if (!existsSync(dirMaterial + "canvas")) mkdirSync(dirMaterial, { recursive: true });
- if (!existsSync(path)) await downloadFile("https://i.postimg.cc/X7R3CLmb/267378493-3075346446127866-4722502659615516429-n.png", path);
-};
-
-async function makeImage({ one, two }) {
- const fs = global.nodemodule["fs-extra"];
- const path = global.nodemodule["path"];
- const axios = global.nodemodule["axios"];
- const jimp = global.nodemodule["jimp"];
- const __root = path.resolve(__dirname, "cache", "canvas");
-
- let pairing_img = await jimp.read(__root + "/pairing.png");
- let pathImg = __root + `/pairing_${one}_${two}.png`;
- let avatarOne = __root + `/avt_${one}.png`;
- let avatarTwo = __root + `/avt_${two}.png`;
-
- let getAvatarOne = (await axios.get(`https://graph.facebook.com/${one}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
- fs.writeFileSync(avatarOne, Buffer.from(getAvatarOne, 'utf-8'));
-
- let getAvatarTwo = (await axios.get(`https://graph.facebook.com/${two}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`, { responseType: 'arraybuffer' })).data;
- fs.writeFileSync(avatarTwo, Buffer.from(getAvatarTwo, 'utf-8'));
-
- let circleOne = await jimp.read(await circle(avatarOne));
- let circleTwo = await jimp.read(await circle(avatarTwo));
- pairing_img.composite(circleOne.resize(150, 150), 980, 200).composite(circleTwo.resize(150, 150), 140, 200);
-
- let raw = await pairing_img.getBufferAsync("image/png");
-
- fs.writeFileSync(pathImg, raw);
- fs.unlinkSync(avatarOne);
- fs.unlinkSync(avatarTwo);
-
- return pathImg;
-}
-
-async function circle(image) {
- const jimp = require("jimp");
- image = await jimp.read(image);
- image.circle();
- return await image.getBufferAsync("image/png");
+// ✅ Smart gender normalize (improved)
+function normalizeGender(gender) {
+  if (gender === 2 || gender === "2" || gender === "MALE" || gender === "male") return "MALE";
+  if (gender === 1 || gender === "1" || gender === "FEMALE" || gender === "female") return "FEMALE";
+  return null;
 }
 
 module.exports.run = async function ({ api, event }) {
- const axios = require("axios");
- const fs = require("fs-extra");
- const { threadID, messageID, senderID } = event;
+  try {
+    const axios = global.nodemodule["axios"];
+    const fs = global.nodemodule["fs-extra"];
 
- // Match percentage
- const percentages = ['21%', '67%', '19%', '37%', '17%', '96%', '52%', '62%', '76%', '83%', '100%', '99%', '0%', '48%'];
- const matchRate = percentages[Math.floor(Math.random() * percentages.length)];
+    const cacheDir = __dirname + "/cache";
+    if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
 
- // Sender info
- let senderInfo = await api.getUserInfo(senderID);
- let senderName = senderInfo[senderID].name;
+    const threadInfo = await api.getThreadInfo(event.threadID);
+    let members = threadInfo.userInfo || [];
 
- // Random partner
- let threadInfo = await api.getThreadInfo(threadID);
- let participants = threadInfo.participantIDs.filter(id => id !== senderID);
- let partnerID = participants[Math.floor(Math.random() * participants.length)];
- let partnerInfo = await api.getUserInfo(partnerID);
- let partnerName = partnerInfo[partnerID].name;
+    const botID = api.getCurrentUserID();
 
- // Mentions
- let mentions = [
- { id: senderID, tag: senderName },
- { id: partnerID, tag: partnerName }
- ];
+    // ✅ Get sender info
+    const senderUser = members.find(u => String(u.id) === String(event.senderID));
+    if (!senderUser) {
+      return api.sendMessage(
+        "🍒 Could not detect your profile.",
+        event.threadID,
+        event.messageID
+      );
+    }
 
- // Generate and send image
- let one = senderID, two = partnerID;
- return makeImage({ one, two }).then(path => {
- api.sendMessage({
- body: `🥰 Successful Pairing!\n💌 Wishing you two a lifetime of unexpected happiness – even with a ${matchRate} match!\n💕 Compatibility Score: ${matchRate}\nUnlikely but Unstoppable: [${senderName} + ${partnerName}]👨‍❤️‍👨`,
- mentions,
- attachment: fs.createReadStream(path)
- }, threadID, () => fs.unlinkSync(path), messageID);
- });
+    let senderGender = normalizeGender(senderUser.gender);
+
+    // ❗ Latest trick: fallback detection using name (if gender missing)
+    if (!senderGender) {
+      const name = (senderUser.name || "").toLowerCase();
+      if (name.match(/a$|i$|y$|ah$|ia$/)) senderGender = "FEMALE";
+      else senderGender = "MALE"; // fallback default
+    }
+
+    // ✅ Strict opposite gender filter
+    let candidates = members.filter(u => {
+      if (
+        String(u.id) === String(botID) ||
+        String(u.id) === String(event.senderID)
+      ) return false;
+
+      let g = normalizeGender(u.gender);
+
+      // fallback detection
+      if (!g) {
+        const name = (u.name || "").toLowerCase();
+        if (name.match(/a$|i$|y$|ah$|ia$/)) g = "FEMALE";
+        else g = "MALE";
+      }
+
+      return g !== senderGender;
+    });
+
+    if (!candidates.length) {
+      return api.sendMessage(
+        "🍓 No opposite gender members found in this group.",
+        event.threadID,
+        event.messageID
+      );
+    }
+
+    const targetUser = candidates[Math.floor(Math.random() * candidates.length)];
+    const targetID = targetUser.id;
+
+    const senderInfo = await api.getUserInfo(event.senderID);
+    const targetInfo = await api.getUserInfo(targetID);
+
+    const senderName =
+      senderInfo?.[event.senderID]?.name || "User";
+
+    const targetName =
+      targetInfo?.[targetID]?.name || "Crush";
+
+    const percent = Math.floor(Math.random() * 100) + 1;
+
+    let vibe = "Sweet vibe";
+    if (percent <= 10) vibe = "Just a tiny spark";
+    else if (percent <= 20) vibe = "Shy connection";
+    else if (percent <= 35) vibe = "Funny match";
+    else if (percent <= 50) vibe = "Cute energy";
+    else if (percent <= 65) vibe = "Nice chemistry";
+    else if (percent <= 80) vibe = "Lovely pair";
+    else if (percent <= 95) vibe = "Almost perfect";
+    else vibe = "Perfect match";
+
+    const file1 = `${cacheDir}/pair_${targetID}.png`;
+    const file2 = `${cacheDir}/pair_${event.senderID}.png`;
+
+    const avatar1 = (
+      await axios.get(
+        `https://graph.facebook.com/${targetID}/picture?height=720&width=720&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`,
+        { responseType: "arraybuffer" }
+      )
+    ).data;
+
+    const avatar2 = (
+      await axios.get(
+        `https://graph.facebook.com/${event.senderID}/picture?height=720&width=720&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`,
+        { responseType: "arraybuffer" }
+      )
+    ).data;
+
+    fs.writeFileSync(file1, Buffer.from(avatar1));
+    fs.writeFileSync(file2, Buffer.from(avatar2));
+
+    const msg = {
+      body:
+        "🍒 PAIR RESULT 🍒\n\n" +
+        `${senderName} × ${targetName}\n\n` +
+        `Match: ${percent}%\n` +
+        `Vibe: ${vibe}\n` +
+        `Type: Opposite Gender Match`,
+      attachment: [
+        fs.createReadStream(file1),
+        fs.createReadStream(file2)
+      ]
+    };
+
+    return api.sendMessage(msg, event.threadID, () => {
+      try { if (fs.existsSync(file1)) fs.unlinkSync(file1); } catch {}
+      try { if (fs.existsSync(file2)) fs.unlinkSync(file2); } catch {}
+    }, event.messageID);
+
+  } catch (err) {
+    console.log("pair error:", err);
+    return api.sendMessage(
+      "🍓 Error: " + err.message,
+      event.threadID,
+      event.messageID
+    );
+  }
 };
