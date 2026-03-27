@@ -1,119 +1,122 @@
 module.exports.config = {
-        name: "help",
-        version: "1.0.2",
-        hasPermssion: 0,
-        credits: "MAHIM ISLAM",
-        description: "FREE SET-UP MESSENGER",
-        commandCategory: "system",
-        usages: "[Name module]",
-        cooldowns: 5,
-        envConfig: {
-                autoUnsend: true,
-                delayUnsend: 20
-        }
+    name: "help",
+    version: "6.0.0",
+    hasPermssion: 0,
+    credits: "MAHIM ISLAM",
+    description: "Bold aesthetic help menu with typing",
+    commandCategory: "system",
+    usages: "[command]",
+    cooldowns: 5,
+    envConfig: {
+        autoUnsend: true,
+        delayUnsend: 30
+    }
 };
 
-module.exports.languages = {
- "en": {
-    "moduleInfo": "╭──────•◈•──────╮\n |       🌸 —  mahim bot ୨୧\n |●𝗡𝗮𝗺𝗲: •—» %1 «—•\n |●𝗨𝘀𝗮𝗴𝗲: %3\n |●𝗗𝗲𝘀𝗰𝗿𝗶p𝘁𝗶𝗼𝗻: %2\n |●𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝘆: %4\n |●𝗪𝗮𝗶𝘁𝗶𝗻𝗴 𝘁𝗶𝗺𝗲: %5 seconds(s)\n |●𝗣𝗲𝗿𝗺𝗶𝘀𝘀𝗶𝗼𝗻: %6\n |𝗠𝗼𝗱𝘂𝗹𝗲 𝗰𝗼𝗱𝗲 𝗯𝘆\n |•—» Mahim «—•\n╰──────•◈•──────╯",
-    "helpList": '[ There are %1 commands on this bot, Use: "%2help nameCommand" to know how to use! ]',
-    "user": "User",
-        "adminGroup": "Admin group",
-        "adminBot": "Admin bot"
-  }
-};
+// 🔥 smart send with typing
+function sendWithTyping(api, threadID, message, messageID) {
+    const delay = Math.min(Math.max(message.length * 15, 800), 2500); // 0.8s → 2.5s
 
-module.exports.handleEvent = function ({ api, event, getText }) {
- const { commands } = global.client;
- const { threadID, messageID, body } = event;
+    api.sendTypingIndicator(threadID, true);
 
- if (!body || typeof body == "undefined" || body.indexOf("help") != 0) return;
- const splitBody = body.slice(body.indexOf("help")).trim().split(/\s+/);
- if (splitBody.length == 1 || !commands.has(splitBody[1].toLowerCase())) return;
- const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
- const command = commands.get(splitBody[1].toLowerCase());
- const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
- return api.sendMessage(getText("moduleInfo", command.config.name, command.config.description, `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`, command.config.commandCategory, command.config.cooldowns, ((command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot")), command.config.credits), threadID, messageID);
+    setTimeout(() => {
+        api.sendTypingIndicator(threadID, false);
+
+        api.sendMessage(message, threadID, (err, info) => {
+            setTimeout(() => api.unsendMessage(info.messageID), 30000);
+        }, messageID);
+
+    }, delay);
 }
 
-module.exports. run = function({ api, event, args, getText }) {
-  const axios = require("axios");
-  const request = require('request');
-  const fs = require("fs-extra");
- const { commands } = global.client;
- const { threadID, messageID } = event;
- const command = commands.get((args[0] || "").toLowerCase());
- const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
- const { autoUnsend, delayUnsend } = global.configModule[this.config.name];
- const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
-if (args[0] == "all") {
-    const command = commands.values();
-    var group = [], msg = "";
-    for (const commandConfig of command) {
-      if (!group.some(item => item.group.toLowerCase() == commandConfig.config.commandCategory.toLowerCase())) group.push({ group: commandConfig.config.commandCategory.toLowerCase(), cmds: [commandConfig.config.name] });
-      else group.find(item => item.group.toLowerCase() == commandConfig.config.commandCategory.toLowerCase()).cmds.push(commandConfig.config.name);
-    }
-    group.forEach(commandGroup => msg += `❄️ ${commandGroup.group.charAt(0).toUpperCase() + commandGroup.group.slice(1)} \n${commandGroup.cmds.join(' • ')}\n\n`);
+module.exports.handleEvent = function ({ api, event }) {
+    const { commands } = global.client;
+    const { threadID, messageID, body } = event;
 
-    return axios.get('https://loidsenpaihelpapi.miraiandgoat.repl.co').then(res => {
-    let ext = res.data.data.substring(res.data.data.lastIndexOf(".") + 1);
-      let admID = "61551846081032";
+    if (!body || !body.startsWith("help")) return;
 
-      api.getUserInfo(parseInt(admID), (err, data) => {
-      if(err){ return console.log(err)}
-     var obj = Object.keys(data);
-    var firstname = data[obj].name.replace("@", "");
-    let callback = function () {
-        api.sendMessage({ body:`✿🄲🄾🄼🄼🄰🄽🄳 🄻🄸🅂🅃✿\n\n` + msg + `✿══════════════✿\n│𝗨𝘀𝗲 ${prefix}help [Name?]\n│𝗨𝘀𝗲 ${prefix}help [Page?]\n│Owner name: 𝗠𝗔𝗛𝗜𝗠 \n│𝗧𝗢𝗧𝗔𝗟 :  ${commands.size}\n————————————`, mentions: [{
-                           tag: firstname,
-                           id: admID,
-                           fromIndex: 0,
-                 }],
-            attachment: fs.createReadStream(__dirname + `/cache/472.${ext}`)
-        }, event.threadID, (err, info) => {
-        fs.unlinkSync(__dirname + `/cache/472.${ext}`);
-        if (autoUnsend == false) {
-            setTimeout(() => {
-                return api.unsendMessage(info.messageID);
-            }, delayUnsend * 1000);
-        }
-        else return;
-    }, event.messageID);
-        }
-         request(res.data.data).pipe(fs.createWriteStream(__dirname + `/cache/472.${ext}`)).on("close", callback);
-     })
-      })
+    const args = body.trim().split(/\s+/);
+    if (args.length < 2) return;
+
+    const cmd = commands.get(args[1].toLowerCase());
+    if (!cmd) return;
+
+    const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
+    const prefix = threadSetting.PREFIX || global.config.PREFIX;
+
+    const msg =
+`🍒 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗜𝗡𝗙𝗢 🍓
+
+✦ ${cmd.config.name}
+│ ${cmd.config.description}
+│ 𝗨𝘀𝗲: ${prefix}${cmd.config.name} ${cmd.config.usages || ""}
+│ 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝘆: ${cmd.config.commandCategory}
+│ 𝗖𝗼𝗼𝗹𝗱𝗼𝘄𝗻: ${cmd.config.cooldowns}s
+
+‧₊˚🩰🍃`;
+
+    return sendWithTyping(api, threadID, msg, messageID);
 };
- if (!command) {
-  const arrayInfo = [];
-  const page = parseInt(args[0]) || 1;
-    const numberOfOnePage = 15;
-    let i = 0;
-    let msg = "";
 
-    for (var [name, value] of (commands)) {
-      name += ``;
-      arrayInfo.push(name);
+module.exports.run = function ({ api, event, args }) {
+    const { commands } = global.client;
+    const { threadID, messageID } = event;
+
+    const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
+    const prefix = threadSetting.PREFIX || global.config.PREFIX;
+
+    const cmd = commands.get((args[0] || "").toLowerCase());
+
+    // ✨ ALL COMMANDS
+    if (args[0] === "all") {
+        const group = {};
+
+        for (const c of commands.values()) {
+            const cat = c.config.commandCategory || "other";
+            if (!group[cat]) group[cat] = [];
+            group[cat].push(`✦ ${c.config.name}`);
+        }
+
+        let msg = `🍒 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 🍓\n\n`;
+
+        for (const g in group) {
+            msg += `‧₊˚🩰 ${g}\n${group[g].join("  ")}\n\n`;
+        }
+
+        msg += `🍃 𝗨𝘀𝗲: ${prefix}help [name]`;
+
+        return sendWithTyping(api, threadID, msg, messageID);
     }
 
-    arrayInfo.sort((a, b) => a.data - b.data);  
-const first = numberOfOnePage * page - numberOfOnePage;
-   i = first;
-   const helpView = arrayInfo.slice(first, first + numberOfOnePage);
+    // ✨ PAGINATION
+    if (!cmd) {
+        const list = [...commands.keys()].sort();
+        const page = parseInt(args[0]) || 1;
+        const perPage = 15;
 
+        const total = Math.ceil(list.length / perPage);
+        const slice = list.slice((page - 1) * perPage, page * perPage);
 
-   for (let cmds of helpView) msg += `•—»[ ${cmds} ]«—•\n`;
-    const siu = `╭──────•◈•──────╮\n |        🌸 —  mahim bot ୨୧ \n |   🄲🄾🄼🄼🄰🄽🄳 🄻🄸🅂🅃       \n╰──────•◈•──────╯`;
-const text = `╭──────•◈•──────╮\n│𝗨𝘀𝗲 ${prefix}help [Name?]\n│𝗨𝘀𝗲 ${prefix}help [Page?]\n│Owner name: 𝗠𝗔𝗛𝗜𝗠\n│𝗧𝗢𝗧𝗔𝗟 : [${arrayInfo.length}]\n│📛🄿🄰🄶🄴📛 :  [${page}/${Math.ceil(arrayInfo.length/numberOfOnePage)}]\n╰──────•◈•──────╯`; 
-    var link = [ "https://i.ibb.co/JFmKbLNf/IMG-20250711-103427.png" ]
-     var callback = () => api.sendMessage({ body: siu + "\n\n" + msg  + text, attachment: fs.createReadStream(__dirname + "/cache/loidbutter.jpg")}, event.threadID, () => fs.unlinkSync(__dirname + "/cache/loidbutter.jpg"), event.messageID);
-    return request(encodeURI(link[Math.floor(Math.random() * link.length)])).pipe(fs.createWriteStream(__dirname + "/cache/loidbutter.jpg")).on("close", () => callback());
- }
-const leiamname = getText("moduleInfo", command.config.name, command.config.description, `${(command.config.usages) ? command.config.usages : ""}`, command.config.commandCategory, command.config.cooldowns, ((command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot")), command.config.credits);
+        let msg = `🍒 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 🍓\n\n`;
 
-  var link = [
-"https://i.ibb.co/JFmKbLNf/IMG-20250711-103427.png",
-  ]
-    var callback = () => api.sendMessage({ body: leiamname, attachment: fs.createReadStream(__dirname + "/cache/loidbutter.jpg")}, event.threadID, () => fs.unlinkSync(__dirname + "/cache/loidbutter.jpg"), event.messageID);
-return request(encodeURI(link[Math.floor(Math.random() * link.length)])).pipe(fs.createWriteStream(__dirname + "/cache/loidbutter.jpg")).on("close", () => callback());
+        slice.forEach(c => msg += `✦ ${c}\n`);
+
+        msg += `\n‧₊˚🩰 𝗣𝗮𝗴𝗲: ${page}/${total}\n🍃 ${prefix}help [name]`;
+
+        return sendWithTyping(api, threadID, msg, messageID);
+    }
+
+    // ✨ COMMAND INFO
+    const msg =
+`🍒 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗜𝗡𝗙𝗢 🍓
+
+✦ ${cmd.config.name}
+│ ${cmd.config.description}
+│ 𝗨𝘀𝗲: ${prefix}${cmd.config.name} ${cmd.config.usages || ""}
+│ 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝘆: ${cmd.config.commandCategory}
+│ 𝗖𝗼𝗼𝗹𝗱𝗼𝘄𝗻: ${cmd.config.cooldowns}s
+
+‧₊˚🩰🍃`;
+
+    return sendWithTyping(api, threadID, msg, messageID);
 };
