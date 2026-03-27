@@ -1,7 +1,7 @@
 module.exports.config = {
 	name: "pending",
 	version: "1.0.5",
-	credits: "MAHBUB SHAON",
+	credits: "MAHIM ISLAM",
 	hasPermssion: 2,
 	description: "Manage bot's waiting messages",
 	commandCategory: "system",
@@ -22,7 +22,7 @@ module.exports.languages = {
  "en": {
  "invaildNumber": "%1 is not an invalid number",
  "cancelSuccess": "Refused %1 thread!",
- "notiBox": "𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 × • 𝗜𝘀𝗹𝗮𝗺𝗶𝗰𝗸 𝗰𝗵𝗮𝘁 𝗯𝗼𝘁 | ᵁᴸᴸ⁴ˢᴴ Connected Successfully!\nUse /help for more info :>",
+ "notiBox": "🍓 𝗧𝗵𝗶𝘀 𝗴𝗿𝗼𝘂𝗽 𝗵𝗮𝘀 𝗯𝗲𝗲𝗻 𝘀𝘂𝗰𝗰𝗲𝘀𝘀𝗳𝘂𝗹𝗹𝘆 𝗮𝗽𝗽𝗿𝗼𝘃𝗲𝗱! ✅",
  "approveSuccess": "Approved successfully %1 threads!",
 
  "cantGetPendingList": "Can't get the pending list!",
