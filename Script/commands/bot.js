@@ -238,8 +238,8 @@ module.exports.handleEvent = async function({ api, event, Users }) {
     return api.sendMessage("𖦹 𝗖𝘂𝗿𝗿𝗲𝗻𝘁𝗹𝘆 .𝗮𝗶 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 𝗻𝗼𝘁 𝗮𝗰𝘁𝗶𝘃𝗲! 😊", threadID);
   }
   
-  if (["chup", "stop", "চুপ কর", "chup kor"].includes(text)) {
-    return api.sendMessage("তুই চুপ চুপ কর পাগল ছাগল", threadID);
+  if (["chup", "stop", "চুপ কর", "chup kor", "chup koro", "tham"].includes(text)) {
+    return api.sendMessage("তুই চুপ কর পাগল ছাগল! 🌚", threadID);
   }
   
   if (["আসসালামু আলাইকুম", "assalamualaikum", "assalamu alaikum", "salam"].includes(text)) {
@@ -259,7 +259,7 @@ module.exports.handleEvent = async function({ api, event, Users }) {
   }
   
   if (["mg", "mgi"].includes(text)) {
-    return api.sendMessage("খবরদার কেউ এই নাম দরে ডাক দিবানা এটা আমার Ex এর নাম..!😠🥰⛏️", threadID);
+    return api.sendMessage("খবরদার কেউ এই নাম দরে ডাক দিবানা এটা আমার বন্ধুর Ex এর নাম..!😠🥰⛏️", threadID);
   }
   
   if (["kiss me"].includes(text)) {
@@ -270,11 +270,11 @@ module.exports.handleEvent = async function({ api, event, Users }) {
     return api.sendMessage("️এতো ধন্যবাদ না দিয়ে পারলে গার্লফ্রেন্ড টা দিয়ে দে..!🌚⛏️🌶️", threadID);
   }
   
-  if (["....", "😠", "🤬", "😾"].includes(text)) {
+  if (["....", "😠", "🤬", "😾", "😡"].includes(text)) {
     return api.sendMessage("️রাগ করে না সোনা পাখি এতো রাগ শরীরের জন্য ভালো না🥰", threadID);
   }
   
-  if (["হুম", "hum", "humm", "hm"].includes(text)) {
+  if (["হুম", "hum", "humm", "hm", "hmm"].includes(text)) {
     return api.sendMessage("️হুম চো₹!ইস না মাথা এমনিতেই গরম আছে🤬⛏️😷", threadID);
   }
   
@@ -282,48 +282,48 @@ module.exports.handleEvent = async function({ api, event, Users }) {
     return api.sendMessage("️MY NAME IS °_>𝗠𝗔𝗛𝗜𝗠 𝗕𝗕𝗭!", threadID);
   }
   
-  if (["bot er baccha"].includes(text)) {
+  if (["bot er baccha", "baccha"].includes(text)) {
     return api.sendMessage("️আমার বাচ্চা তো তোমার গার্লফ্রেন্ডের পেটে..!!🌚⛏️🌶️ ", threadID);
   }
   
-  if (["pic de", "ss daw"].includes(text)) {
-    return api.sendMessage("️এন থেকে সর দুরে গিয়া মর😒", threadID);
+  if (["pic de", "ss deu", "ss de", "react de", "react deu"].includes(text)) {
+    return api.sendMessage("️এন থেকে সর দুরে গিয়া মর!😒", threadID);
   }
   
-  if (["bby", "ex"].includes(text)) {
+  if (["leader"].includes(text)) {
     return api.sendMessage("️Kiss Randi Ka Name Le Ke Mood Khrab Kr Diya.🙄 Dubara Naam Mat Lena Iska", threadID);
   }
   
-  if (["chudi", "tor nanire xudi"].includes(text)) {
+  if (["chudi", "tor nanire xudi", "cdi", "tor nani re", "cudi"].includes(text)) {
     return api.sendMessage("️এত চো₹! চু¡₹ করস কেনো দেখা যাবে বাসর-রাতে-তুই-কতো পারিস..!🥱🌝🌚⛏️🌶️ ", threadID);
   }
   
-  if (["😅"].includes(text)) {
-    return api.sendMessage("️কি গো কলিজা তোমার কি মন খারাপ🥺", threadID);
+  if (["😅", "😞", "😥", "😭", "😓"].includes(text)) {
+    return api.sendMessage("️কি গো কলিজা তোমার কি মন খারাপ? 🥺", threadID);
   }
   
   if (["😒", "🙄"].includes(text)) {
-    return api.sendMessage("️ এইদিকে ওইদিকে কি দেখো জানু আমি তোমার সামনে দেখো😘", threadID);
+    return api.sendMessage("️ এইদিকে ওইদিকে কি দেখো জানু আমি তোমার সামনে দেখো! 😘", threadID);
   }
   
   if (["amake kew valobashe na", "aj kew nai bole"].includes(text)) {
-    return api.sendMessage("️চিন্তা করো কেন আমি তো আছি🫶\nতোমাকে রাইতে ভালোবাসবো", threadID);
+    return api.sendMessage("️চিন্তা করো কেন আমি তো আছি🫶\nতোমাকে রাইতে ভালোবাসবো! 🌚", threadID);
   }
   
-  if (["gf", "bf"].includes(text)) {
+  if (["gf", "bf", "ex"].includes(text)) {
     return api.sendMessage("খালি কি তোরাই পেম করবি আমাকেও একটা গফ দে<🥺", threadID);
   }
   
-  if (["😂", "😁", "😆", "🤣", "😸", "😹"].includes(text)) {
+  if (["😂", "😁", "😆", "🤣", "😸", "😹", "😃", "😄"].includes(text)) {
     return api.sendMessage("ভাই তুই এত হাসিস না, হাসলে তোরে চোরের মতো লাগে..!🌚🤣", threadID);
   }
   
-  if (["🥰", "😍", "😻", "❤️"].includes(text)) {
-    return api.sendMessage("ভালোবাসা নামক আবলামী করতে চাইলে ইনবক্সে চলে যা পাগল ছাগল🌚🐸🌶️🍆", threadID);
+  if (["🥰", "😍", "😻", "❤️", "😘"].includes(text)) {
+    return api.sendMessage("ভালোবাসা নামক আবলামী করতে চাইলে ইনবক্সে চলে যা পাগল ছাগল!🌚🐸🌶️🍆", threadID);
   }
   
   if (["কেমন আছো", "কেমন আছেন", "kemon acho", "how are you", "how are you?"].includes(text)) {
-    return api.sendMessage("আমি তখনই ভালো থাকি যখন আপনাকে হাসতে দেখি🤎☺️", threadID);
+    return api.sendMessage("আমি তখনই ভালো থাকি যখন আপনাকে হাসতে দেখি!🤎☺️", threadID);
   }
   
   if (["mon kharap", "tmr ki mon kharap"].includes(text)) {
@@ -334,7 +334,7 @@ module.exports.handleEvent = async function({ api, event, Users }) {
     return api.sendMessage("সব মুতার জায়গায় গুঁতা দেওয়ার ধান্দা 😪🥱", threadID);
   }
   
-  if (["by", "bye", "jaiga", "বাই", "pore kotha hobe", "যাই গা"].includes(text)) {
+  if (["by", "bye", "jaiga", "বাই", "pore kotha hobe", "যাই গা", "gelam"].includes(text)) {
     return api.sendMessage("কিরে তুই কই যাস কোন মেয়ের সাথে চিপায় যাবি..!🌚🌶️🍆⛏️", threadID);
   }
   
@@ -350,36 +350,36 @@ module.exports.handleEvent = async function({ api, event, Users }) {
     return api.sendMessage("হ্যা বস কেমন আছেন..?☺️", threadID);
   }
   
-  if (["ki koro", "ki korso"].includes(text)) {
+  if (["ki koro", "ki kortecho"].includes(text)) {
     return api.sendMessage("তোমার মেসেজের রিপ্লাই দেওয়ার জন্য বসে আছি জানু 😘", threadID);
   }
   
   if (["ki obostha", "obostha ki"].includes(text)) {
-    return api.sendMessage("অবস্থা তো খুবই টাইট, গার্লফ্রেন্ড নাই তো তাই 😭", threadID);
+    return api.sendMessage("অবস্থা তো খুবই টাইট, গার্লফ্রেন্ড নাই তো তাই! 😭", threadID);
   }
   
-  if (["hi", "hello", "hlw", "hallo"].includes(text)) {
+  if (["hi", "hello", "hlw", "hallo", "hey", "hei", "hiii"].includes(text)) {
     return api.sendMessage("হ্যালো কলিজা! কেমন আছো? 🥰", threadID);
   }
   
   if (["vai", "bhai", "vaiya", "bhaia"].includes(text)) {
-    return api.sendMessage("ভাই ডাকবি না, আমি তোর ক্রাশ 🙈", threadID);
+    return api.sendMessage("ভাই ডাকবি না, আমি তোর ক্রাশ! 🙈", threadID);
   }
   
-  if (["kutta", "chagol", "pagol"].includes(text)) {
-    return api.sendMessage("গাল্লি দিস ক্যান আবাল 🐸 তোর মুখে গন্ধ, দুরে গিয়া মর 😾", threadID);
+  if (["kutta", "chagol", "pagol", "nodi", "magi", "abal", "bc", "mc", "shawya", "putki", "voda", "vuda", "khanki", "bessha"].includes(text)) {
+    return api.sendMessage("গাল্লি দিস ক্যান আবাল 🐸 তোর মুখে গন্ধ, দুরে গিয়া মর! 😾", threadID);
   }
   
-  if (["ok", "hmm", "accha"].includes(text)) {
-    return api.sendMessage("হুম হুম করিস না, ভালো কিছু বল 😒", threadID);
+  if (["ok", "thik ache", "accha"].includes(text)) {
+    return api.sendMessage("এন থেকে সর, দূরে গিয়ে মর! 🤨", threadID);
   }
   
   if (["good night", "gd n8", "ghumate jabo"].includes(text)) {
-    return api.sendMessage("গুড নাইট জানু, স্বপ্নে কিন্তু আমারেই দেখবা 😴❤️", threadID);
+    return api.sendMessage("গুড নাইট জানু, স্বপ্নে কিন্তু আমারেই দেখবা! 😴❤️", threadID);
   }
   
   if (["sad", "kosto", "kanna"].includes(text)) {
-    return api.sendMessage("কান্দিস না ভাই, সব ঠিক হয়ে যাবে 🥹 আমি তো আছি তোর পাশে ❤️", threadID);
+    return api.sendMessage("কান্দিস না ভাই, সব ঠিক হয়ে যাবে 🥹 আমি তো আছি তোর পাশে! ❤️", threadID);
   }
   
   if (["love you too", "love u too"].includes(text)) {
