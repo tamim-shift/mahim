@@ -47,7 +47,7 @@ const greetings = [
   "জান মেয়ে হলে চিপায় আসো ইউটিউব থেকে অনেক ভালোবাসা শিখছি তোমার জন্য-🙊🙈😽",
   "ইসস এতো ডাকো কেনো লজ্জা লাগে তো-🙈🖤🌼", "আমার বস মাহিম'র পক্ষ থেকে তোমারে এতো এতো ভালোবাসা-🥰😽🫶 আমার বস মাহিম'র জন্য দোয়া করবেন-💝💚🌺🌻",
   "- ভালোবাসা নামক আব্লামি করতে মন চাইলে আমার বস মাহিম এর ইনবক্সে চলে যাও-🙊🥱👅 🌻",
-  "গান শুনতে মন চাইলে mahim.xo.je/music এ যা, আমারে ডিস্টার্ব করিস না 🎧",
+  "গান শুনতে মন চাইলে mahim.xo.je/music এ যা, আমারে ডিস্টার্ব করিসবিধা 🎧",
   "তোর মতো ফাউলদের সাথে কথা বলতে আমার কিবোর্ড কাঁদে 😭", "জান তুমি শুধু আমার আমি তোমারে ৩৬৫ দিন ভালোবাসি-💝🌺😽",
   "জান বাল ফালাইবা-🙂🥱🙆‍♂", "-আন্টি-🙆-আপনার মেয়ে-👰‍♀️-রাতে আমারে ভিদু কল দিতে বলে🫣-🥵🤤💦",
   "oii-🥺🥹-এক🥄 চামচ ভালোবাসা দিবা-🤏🏻🙂", "-আপনার সুন্দরী বান্ধুবীকে ফিতরা হিসেবে আমার বস মাহিম কে দান করেন-🥱🐰🍒",
@@ -160,7 +160,6 @@ module.exports.config = {
   prefix: false
 };
 
-// 🛡️ REVERTED back to simple sending. We will handle replies via the Smart Fallback below!
 async function fetchAndSendSimSimi(api, event, text, senderName) {
   try {
     const res = await axios.get(
@@ -177,7 +176,8 @@ async function fetchAndSendSimSimi(api, event, text, senderName) {
       if (!reply) continue; 
       
       await new Promise((resolve) => {
-        api.sendMessage(reply, event.threadID, () => resolve(), event.messageID);
+        // Added err parameter to ensure resolution even if the message fails to send
+        api.sendMessage(reply, event.threadID, (err) => resolve(), event.messageID);
       });
     }
   } catch (error) {
@@ -256,7 +256,6 @@ module.exports.run = async function ({ api, event, args, Users }) {
   }
 };
 
-// Intentionally left empty - we are managing replies via the smart fallback in handleEvent now.
 module.exports.handleReply = async function ({ api, event, Users }) {};
 
 module.exports.handleEvent = async function ({ api, event, Users }) {
@@ -269,23 +268,22 @@ module.exports.handleEvent = async function ({ api, event, Users }) {
     const senderName = await Users.getNameUser(event.senderID);
     const senderID = event.senderID;
 
-    // 🎯 THE SMART FALLBACK: Handles ANY reply to the bot's messages
+    // 🎯 Handles ANY reply to the bot's messages
     if (event.type === "message_reply" && event.messageReply && event.messageReply.senderID == api.getCurrentUserID()) {
-      
-      // Check if ANOTHER command is waiting for this specific reply (e.g., a search menu or music player)
       let isPending = false;
-      if (global.client.handleReply && Array.isArray(global.client.handleReply)) {
+      
+      // Safety check: ensure global.client exists to avoid crashes
+      if (global.client && global.client.handleReply && Array.isArray(global.client.handleReply)) {
         isPending = global.client.handleReply.some(item => item.messageID == event.messageReply.messageID);
       }
       
-      // If no other command claims it, let SimSimi have a fun conversation!
       if (!isPending) {
         await fetchAndSendSimSimi(api, event, raw, senderName);
         return;
       }
     }
 
-    // Check for single triggers (exact match)
+    // 🎯 If the message is EXACTLY a trigger word (e.g., just "baby" or "জান")
     if (singleTriggers.includes(raw)) {
       const randomReply = greetings[Math.floor(Math.random() * greetings.length)];
       const mention = {
@@ -295,15 +293,28 @@ module.exports.handleEvent = async function ({ api, event, Users }) {
           id: senderID
         }]
       };
-
       return api.sendMessage(mention, event.threadID, event.messageID);
     }
 
-    // Check for prefix triggers (starts with)
-    const matchedPrefix = prefixTriggers.find(trigger => raw.startsWith(trigger + " "));
-    if (matchedPrefix) {
-      const query = raw.slice(matchedPrefix.length).trim();
-      if (!query) return;
+    // 🎯 If ANY part of the message CONTAINS a trigger word
+    const words = raw.split(/\s+/); // Splits message into individual words
+    const containsTrigger = prefixTriggers.some(trigger => words.includes(trigger));
+
+    if (containsTrigger) {
+      let query = raw;
+      
+      // Remove the trigger word from the query so the bot responds strictly to the question
+      for (const trigger of prefixTriggers) {
+        if (words.includes(trigger)) {
+          const regex = new RegExp(`(^|\\s)${trigger}(?=\\s|$)`, 'i');
+          query = query.replace(regex, ' ').trim();
+          break; // Stop after removing one trigger to keep the message natural
+        }
+      }
+      
+      // Fallback in case removing the trigger makes the query empty
+      if (!query) query = raw; 
+
       await fetchAndSendSimSimi(api, event, query, senderName);
     }
 
