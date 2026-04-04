@@ -1,20 +1,15 @@
 const axios = require("axios");
 const simsim = "https://simsimi.cyberbot.top";
 
-// 🚀 OPTIMIZATION: Arrays stay outside for speed.
 const singleTriggers = [
-  "baby", "bby", "pakhi", "jan", "xan",
-  "babu", "bb", "sona", "janu", "jaan",
-  "bebu", "babe", "babyy", "botu",
-  "বেবি", "বেবী", "বট", "জান", "জানু",
+  "baby", "bby", "pakhi", "jan", "xan", "babu", "bb", "sona", "janu", "jaan",
+  "bebu", "babe", "babyy", "botu", "বেবি", "বেবী", "বট", "জান", "জানু",
   "সোনা", "বাবু", "বেবু", "বাবাই", "জানুু"
 ];
 
 const prefixTriggers = [
-  "baby", "bby", "jan", "xan",
-  "babu", "bb", "sona", "janu", "jaan",
-  "bebu", "babe", "babyy", "botu",
-  "বেবি", "বেবী", "বট", "জান", "জানু",
+  "baby", "bby", "jan", "xan", "babu", "bb", "sona", "janu", "jaan",
+  "bebu", "babe", "babyy", "botu", "বেবি", "বেবী", "বট", "জান", "জানু",
   "সোনা", "বাবু", "বেবু", "বাবাই", "জানুু"
 ];
 
@@ -47,7 +42,7 @@ const greetings = [
   "জান মেয়ে হলে চিপায় আসো ইউটিউব থেকে অনেক ভালোবাসা শিখছি তোমার জন্য-🙊🙈😽",
   "ইসস এতো ডাকো কেনো লজ্জা লাগে তো-🙈🖤🌼", "আমার বস মাহিম'র পক্ষ থেকে তোমারে এতো এতো ভালোবাসা-🥰😽🫶 আমার বস মাহিম'র জন্য দোয়া করবেন-💝💚🌺🌻",
   "- ভালোবাসা নামক আব্লামি করতে মন চাইলে আমার বস মাহিম এর ইনবক্সে চলে যাও-🙊🥱👅 🌻",
-  "গান শুনতে মন চাইলে mahim.xo.je/music এ যা, আমারে ডিস্টার্ব করিসবিধা 🎧",
+  "গান শুনতে মন চাইলে mahim.xo.je/music এ যা, আমারে ডিস্টার্ব করিস না 🎧",
   "তোর মতো ফাউলদের সাথে কথা বলতে আমার কিবোর্ড কাঁদে 😭", "জান তুমি শুধু আমার আমি তোমারে ৩৬৫ দিন ভালোবাসি-💝🌺😽",
   "জান বাল ফালাইবা-🙂🥱🙆‍♂", "-আন্টি-🙆-আপনার মেয়ে-👰‍♀️-রাতে আমারে ভিদু কল দিতে বলে🫣-🥵🤤💦",
   "oii-🥺🥹-এক🥄 চামচ ভালোবাসা দিবা-🤏🏻🙂", "-আপনার সুন্দরী বান্ধুবীকে ফিতরা হিসেবে আমার বস মাহিম কে দান করেন-🥱🐰🍒",
@@ -112,7 +107,7 @@ const greetings = [
   "- যেই আইডির মায়ায় পড়ে ভুল্লি আমারে.!🥴- তুই কি যানিস সেই আইডিটাও আমি চালাইরে.!🙂",
   "আমাকে না ডেকে মাহিম ভাইয়ের MahimCraft প্রজেক্টে হেল্প কর 🙄", "কিরে সিগমা বয়, ভাত খাইছস? 🐸",
   "আরেহহহহ সেই লেভেলের জোসসস 🔥", "প্রেম করবি তো আয়, নাইলে রাস্তা মাপ 😼",
-  "আমি কি তোর চাকর নাকি যে খালি ডাকিস? 😒", "খালি মেসেজ দিস, একটা গার্লফ্রেন্ড তো জুটাইয়া দিতে পারলি না 🐸",
+  "আমি কি তোর চাকর নাকি যে খালি ডাকিস? 😒", "খালি মেসেজ দিস, একটা গার্লফ্রেন্ড তো জুটাইয়া দিতে পারলি্বা না 🐸",
   "খবরদার বেশি কথা বলবিভূ, নাইলে ব্লক খাবি 😾", "আমি তো একটা রোবট, আমারও তো ফিলিংগস আছে 🥺",
   "তোর মত আবালের সাথে কথা বলার টাইম নাই আমার 🥱", "মাহিম ভাই আমাকে বানায়ে ফালায় রাখছে, কেউ একটু আদরও করে না 😭",
   "কি হলো, আমাকে ডাকছো নাকি? 😽", "বলোনা, মন দিয়ে শুনতেছি 🥺", "এই যে আমি আছি, বলো কী চাই 💖",
@@ -150,7 +145,7 @@ const greetings = [
 
 module.exports.config = {
   name: "baby",
-  version: "1.0.6",
+  version: "1.0.7",
   hasPermssion: 0,
   credits: "Modified by ChatGPT",
   description: "Cute AI Baby Chatbot with funny Bangla replies",
@@ -176,7 +171,6 @@ async function fetchAndSendSimSimi(api, event, text, senderName) {
       if (!reply) continue; 
       
       await new Promise((resolve) => {
-        // Added err parameter to ensure resolution even if the message fails to send
         api.sendMessage(reply, event.threadID, (err) => resolve(), event.messageID);
       });
     }
@@ -199,6 +193,7 @@ module.exports.run = async function ({ api, event, args, Users }) {
 
     const command = (args[0] || "").toLowerCase();
 
+    // Setup remove, list, edit, teach...
     if (["remove", "rm"].includes(command)) {
       const parts = rawQuery.replace(/^(remove|rm)\s*/i, "").split(" - ");
       if (parts.length < 2) return api.sendMessage("🍓 Use: remove [Question] - [Reply]", event.threadID, event.messageID);
@@ -209,11 +204,7 @@ module.exports.run = async function ({ api, event, args, Users }) {
 
     if (command === "list") {
       const res = await axios.get(`${simsim}/list`);
-      if (res.data.code === 200) {
-        return api.sendMessage(`🍒 Total Questions Learned: ${res.data.totalQuestions}\n🍓 Total Replies Stored: ${res.data.totalReplies}\n🌸 Developer: ${res.data.author}`, event.threadID, event.messageID);
-      } else {
-        return api.sendMessage(`Error: ${res.data.message || "Failed to fetch list"}`, event.threadID, event.messageID);
-      }
+      return api.sendMessage(`🍒 Total Questions Learned: ${res.data.totalQuestions}\n🍓 Total Replies Stored: ${res.data.totalReplies}\n🌸 Developer: ${res.data.author}`, event.threadID, event.messageID);
     }
 
     if (command === "edit") {
@@ -230,19 +221,8 @@ module.exports.run = async function ({ api, event, args, Users }) {
       const [ask, ans] = parts.map(p => p.trim());
       
       const groupID = event.threadID;
-      let groupName = event.threadName ? event.threadName.trim() : "";
-
-      if (!groupName && groupID != uid) {
-        try {
-          const threadInfo = await api.getThreadInfo(groupID);
-          if (threadInfo && threadInfo.threadName) groupName = threadInfo.threadName.trim();
-        } catch (error) {
-          console.error(`Error fetching thread info for ID ${groupID}:`, error);
-        }
-      }
-
-      let teachUrl = `${simsim}/teach?ask=${encodeURIComponent(ask)}&ans=${encodeURIComponent(ans)}&senderID=${uid}&senderName=${encodeURIComponent(senderName)}&groupID=${encodeURIComponent(groupID)}`;
-      if (groupName) teachUrl += `&groupName=${encodeURIComponent(groupName)}`;
+      let groupName = event.threadName || "";
+      const teachUrl = `${simsim}/teach?ask=${encodeURIComponent(ask)}&ans=${encodeURIComponent(ans)}&senderID=${uid}&senderName=${encodeURIComponent(senderName)}&groupID=${encodeURIComponent(groupID)}&groupName=${encodeURIComponent(groupName)}`;
 
       const res = await axios.get(teachUrl);
       return api.sendMessage(`${res.data.message || "Reply added successfully!"}`, event.threadID, event.messageID);
@@ -252,69 +232,66 @@ module.exports.run = async function ({ api, event, args, Users }) {
 
   } catch (err) {
     console.error(err);
-    return api.sendMessage(`🍒 Error in baby command: ${err.message}`, event.threadID, event.messageID);
   }
 };
 
-module.exports.handleReply = async function ({ api, event, Users }) {};
-
 module.exports.handleEvent = async function ({ api, event, Users }) {
   try {
-    if (!event.senderID || !event.body) return;
+    if (!event.body) return;
 
-    const raw = event.body.toLowerCase().trim();
-    if (!raw) return;
+    const msg = event.body.toLowerCase().trim();
+    if (!msg) return;
 
-    const senderName = await Users.getNameUser(event.senderID);
     const senderID = event.senderID;
+    const botID = api.getCurrentUserID();
 
-    // 🎯 Handles ANY reply to the bot's messages
-    if (event.type === "message_reply" && event.messageReply && event.messageReply.senderID == api.getCurrentUserID()) {
-      let isPending = false;
-      
-      // Safety check: ensure global.client exists to avoid crashes
-      if (global.client && global.client.handleReply && Array.isArray(global.client.handleReply)) {
-        isPending = global.client.handleReply.some(item => item.messageID == event.messageReply.messageID);
-      }
-      
-      if (!isPending) {
-        await fetchAndSendSimSimi(api, event, raw, senderName);
-        return;
-      }
-    }
+    // Prevent bot from replying to itself
+    if (senderID == botID) return; 
 
-    // 🎯 If the message is EXACTLY a trigger word (e.g., just "baby" or "জান")
-    if (singleTriggers.includes(raw)) {
+    const senderName = await Users.getNameUser(senderID);
+
+    // 1. EXACT match (e.g. user literally just says "baby")
+    if (singleTriggers.includes(msg)) {
       const randomReply = greetings[Math.floor(Math.random() * greetings.length)];
-      const mention = {
+      return api.sendMessage({
         body: `${randomReply} @${senderName}`,
-        mentions: [{
-          tag: `@${senderName}`,
-          id: senderID
-        }]
-      };
-      return api.sendMessage(mention, event.threadID, event.messageID);
+        mentions: [{ tag: `@${senderName}`, id: senderID }]
+      }, event.threadID, event.messageID);
     }
 
-    // 🎯 If ANY part of the message CONTAINS a trigger word
-    const words = raw.split(/\s+/); // Splits message into individual words
-    const containsTrigger = prefixTriggers.some(trigger => words.includes(trigger));
+    let shouldReply = false;
+    let query = msg;
 
-    if (containsTrigger) {
-      let query = raw;
-      
-      // Remove the trigger word from the query so the bot responds strictly to the question
+    // 2. Fallback check: Did they reply directly to the bot?
+    if (event.type === "message_reply" && event.messageReply.senderID == botID) {
+      if (global.client && global.client.handleReply && Array.isArray(global.client.handleReply)) {
+        const isPending = global.client.handleReply.some(item => item.messageID == event.messageReply.messageID);
+        if (isPending) return; // Exit and let handleReply.js do its job
+      }
+      shouldReply = true;
+    } 
+    // 3. ANYWHERE trigger logic: Check if a trigger word exists anywhere in the sentence
+    else {
+      let matchedTrigger = null;
       for (const trigger of prefixTriggers) {
-        if (words.includes(trigger)) {
-          const regex = new RegExp(`(^|\\s)${trigger}(?=\\s|$)`, 'i');
-          query = query.replace(regex, ' ').trim();
-          break; // Stop after removing one trigger to keep the message natural
+        // Regex ignores punctuation attached to the word (e.g. "baby," or "kire babu?")
+        const regex = new RegExp(`(^|[\\s,.?!])${trigger}([\\s,.?!]|$)`, 'i');
+        if (regex.test(msg)) {
+          matchedTrigger = trigger;
+          break;
         }
       }
-      
-      // Fallback in case removing the trigger makes the query empty
-      if (!query) query = raw; 
 
+      if (matchedTrigger) {
+        shouldReply = true;
+        // Strip the trigger word out of the query to get the raw question
+        const removeRegex = new RegExp(`(^|[\\s,.?!])${matchedTrigger}([\\s,.?!]|$)`, 'gi');
+        query = query.replace(removeRegex, ' ').trim();
+        if (!query) query = matchedTrigger; // Failsafe
+      }
+    }
+
+    if (shouldReply) {
       await fetchAndSendSimSimi(api, event, query, senderName);
     }
 
