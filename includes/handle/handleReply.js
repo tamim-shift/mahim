@@ -2,18 +2,31 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
     return function ({ event }) {
         // Fast exit: if it's not a reply, stop immediately
         if (!event.messageReply) return;
-        
-        const { handleReply, commands } = global.client;
-        
-        // Fast exit: if there are no pending replies in the system, stop
-        if (!handleReply || handleReply.length === 0) return;
 
+        const { handleReply, commands } = global.client;
         const { messageID, threadID, messageReply } = event;
 
-        // 🚀 OPTIMIZATION: Use .find() directly to grab the object in one step
-        const indexOfMessage = handleReply.find(e => e.messageID === messageReply.messageID);
-        if (!indexOfMessage) return;
+        // Check if there is an active command waiting for this specific reply
+        let indexOfMessage = null;
+        if (handleReply && handleReply.length > 0) {
+            indexOfMessage = handleReply.find(e => e.messageID === messageReply.messageID);
+        }
 
+        // 🚀 THE MAGIC FALLBACK: Route stray replies straight to Baby!
+        // If no active command claims this reply, check if they are talking to the bot.
+        if (!indexOfMessage) {
+            if (messageReply.senderID == api.getCurrentUserID()) {
+                const babyCmd = commands.get("baby");
+                if (babyCmd && typeof babyCmd.handleEvent === "function") {
+                    // Force the event to go to baby.js
+                    babyCmd.handleEvent({ api, event, Users, Threads, Currencies, models });
+                }
+            }
+            return; // Stop here so it doesn't crash trying to run an undefined handleNeedExec
+        }
+
+        // --- STANDARD COMMAND EXECUTION CONTINUES BELOW ---
+        
         const handleNeedExec = commands.get(indexOfMessage.name);
         
         if (!handleNeedExec) {
@@ -30,13 +43,11 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
                     const langConfig = global.config.language;
 
                     if (!reply.hasOwnProperty(langConfig)) {
-                        // 🛠️ BUG FIX: 'messengeID' typo changed to 'messageID' to prevent crash
                         return api.sendMessage(global.getText('handleCommand', 'notFoundLanguage', handleNeedExec.config.name), threadID, messageID);
                     }
 
                     let lang = reply[langConfig][value[0]] || '';
                     
-                    // 🧹 DE-OBFUSCATED: Cleaned up the weird hex math that just equaled 0
                     for (let i = value.length; i > 0; i--) {
                         const expReg = RegExp('%' + i, 'g');
                         lang = lang.replace(expReg, value[i]);
@@ -45,7 +56,6 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
                 };
             }
 
-            // 🚀 OPTIMIZATION: Clean object creation and removed duplicate 'models' assignment
             const contextObj = {
                 api,
                 event,
@@ -57,7 +67,7 @@ module.exports = function ({ api, models, Users, Threads, Currencies }) {
                 getText: getText2
             };
 
-            // Execute the reply handler
+            // Execute the specific command's reply handler
             handleNeedExec.handleReply(contextObj);
             
         } catch (error) {
