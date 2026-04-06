@@ -19,10 +19,10 @@ const multiplyBetAmount = (amountStr, multiplier) => {
 
 module.exports.config = {
   name: "slot",
-  version: "1.0.5",
+  version: "1.0.6",
   hasPermssion: 0,
   credits: "MAHIM ISLAM",
-  description: "Play the slot machine",
+  description: "Play the slot machine (70% win chance)",
   commandCategory: "economy",
   usages: "[amount]",
   cooldowns: 5
@@ -43,11 +43,12 @@ module.exports.run = async function ({ api, event, args }) {
       return api.sendMessage(`⚠️ | ${deductRes.data.message}`, event.threadID, event.messageID);
     }
 
-    // Step 2: Determine Win or Loss (Exactly 50% chance)
-    const isWin = Math.random() < 0.5;
+    // Step 2: Determine Win or Loss
+    // INCREASED WIN CHANCE: Change the 0.7 below to adjust the win rate (0.7 = 70%, 0.8 = 80%, etc.)
+    const isWin = Math.random() < 0.6; 
     let profitMultiplier = 0;
     
-    const slots = ["🍒", "🍇", "🍉", "🍓", "🍋", "💎"];
+    const slots = ["🍒", "🍇", "🍉", "🍓", "🍋", "🔔", "💎"];
     let resultEmojis = [];
 
     if (!isWin) {
@@ -55,7 +56,7 @@ module.exports.run = async function ({ api, event, args }) {
       const shuffled = shuffle([...slots]);
       resultEmojis = [shuffled[0], shuffled[1], shuffled[2]];
     } else {
-      // WIN: Determine if 2X (80% of wins) or 3X (20% of wins)
+      // WIN: Determine if 2X (80% of wins) or 3X Jackpot (20% of wins)
       const isJackpot = Math.random() < 0.2; 
       const shuffled = shuffle([...slots]);
       
@@ -68,20 +69,19 @@ module.exports.run = async function ({ api, event, args }) {
       }
     }
 
-    // Step 3: Smart Winnings Payout (Fixing the rate limit and math)
+    // Step 3: Smart Winnings Payout
     if (isWin) {
-      // If profit is 2X, we must add 3X the bet (1X to refund the deduct + 2X profit)
+      // If profit is 2X, we add 3X the bet (1X refunds the initial deduction + 2X pure profit)
       const totalPayoutMultiplier = profitMultiplier + 1; 
       const payoutAmount = multiplyBetAmount(bet, totalPayoutMultiplier);
       
       const addUrl = `https://mahimcraft.alwaysdata.net/economy/?type=add&uid=${uid}&quantity=${payoutAmount}&notes=Slot+Win`;
       
-      // DELAY 1.5 seconds so the API doesn't block the request as spam!
+      // DELAY 1.5 seconds so the API doesn't block the request
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const addRes = await axios.get(addUrl);
       
-      // Error handling just in case the API still fails
       if (addRes.data.status !== "success") {
         return api.sendMessage(`⚠️ | 𝐄𝐫𝐫𝐨𝐫 𝐚𝐝𝐝𝐢𝐧𝐠 𝐰𝐢𝐧𝐧𝐢𝐧𝐠𝐬: ${addRes.data.message}`, event.threadID, event.messageID);
       }
@@ -100,10 +100,10 @@ module.exports.run = async function ({ api, event, args }) {
       if (profitMultiplier === 3) {
         msg += `🎉 𝐉𝐀𝐂𝐊𝐏𝐎𝐓! (𝟑𝐗)\n➕ 💲${profitAmountStr}`;
       } else {
-        msg += `✅ 𝐖𝐎𝐍! (𝟐𝐗)\n➕ 💲${profitAmountStr}`;
+        msg += `✅ 𝐘𝐎𝐔 𝐖𝐎𝐍! (𝟐𝐗)\n➕ 💲${profitAmountStr}`;
       }
     } else {
-      msg += `❌ 𝐋𝐎𝐒𝐓!\n➖ 💲${betUpper}`;
+      msg += `📛 𝐘𝐎𝐔 𝐋𝐎𝐒𝐓!\n➖ 💲${betUpper}`;
     }
 
     return api.sendMessage(msg, event.threadID, event.messageID);
