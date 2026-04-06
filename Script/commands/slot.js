@@ -47,7 +47,7 @@ module.exports.run = async function ({ api, event, args }) {
     const isWin = Math.random() < 0.5;
     let profitMultiplier = 0;
     
-    const slots = ["🍒", "🍇", "🍉", "🍓", "🍋", "🔔", "💎"];
+    const slots = ["🍒", "🍇", "🍉", "🍓", "🍋", "💎"];
     let resultEmojis = [];
 
     if (!isWin) {
@@ -100,10 +100,10 @@ module.exports.run = async function ({ api, event, args }) {
       if (profitMultiplier === 3) {
         msg += `🎉 𝐉𝐀𝐂𝐊𝐏𝐎𝐓! (𝟑𝐗)\n➕ 💲${profitAmountStr}`;
       } else {
-        msg += `✅ 𝐌𝐀𝐓𝐂𝐇𝐄𝐃! (𝟐𝐗)\n➕ 💲${profitAmountStr}`;
+        msg += `✅ 𝐖𝐎𝐍! (𝟐𝐗)\n➕ 💲${profitAmountStr}`;
       }
     } else {
-      msg += `❌ 𝐘𝐎𝐔 𝐋𝐎𝐒𝐓!\n➖ 💲${betUpper}`;
+      msg += `❌ 𝐋𝐎𝐒𝐓!\n➖ 💲${betUpper}`;
     }
 
     return api.sendMessage(msg, event.threadID, event.messageID);
