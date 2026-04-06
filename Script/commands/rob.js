@@ -30,8 +30,8 @@ module.exports.run = async function ({ api, event, Users }) {
     const data = response.data;
 
     if (data.status === "success") {
-      const cleanAmt = data.amount_formatted.replace(/💲/g, '$');
-      const boldMsg = toBoldSerif(`Heist successful! You stole ${cleanAmt} from the Bot!`);
+      // Removed the .replace() method and passed data.amount_formatted directly
+      const boldMsg = toBoldSerif(`Heist successful! You stole ${data.amount_formatted} from the Bot!`);
       
       return api.sendMessage(`🥷 | ${boldMsg}`, event.threadID, event.messageID);
     } 
