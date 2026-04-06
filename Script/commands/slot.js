@@ -45,7 +45,7 @@ module.exports.run = async function ({ api, event, args }) {
 
     // Step 2: Determine Win or Loss
     // INCREASED WIN CHANCE: Change the 0.7 below to adjust the win rate (0.7 = 70%, 0.8 = 80%, etc.)
-    const isWin = Math.random() < 0.6; 
+    const isWin = Math.random() < 0.5; 
     let profitMultiplier = 0;
     
     const slots = ["🍒", "🍇", "🍉", "🍓", "🍋", "🔔", "💎"];
