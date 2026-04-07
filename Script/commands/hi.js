@@ -1,9 +1,9 @@
 module.exports.config = {
   name: "hi",
-  version: "1.0.3",
+  version: "1.0.4",
   hasPermssion: 0,
   credits: "MAHIM ISLAM",
-  description: "hi sticker with expanded dynamic sessions and custom font",
+  description: "hi sticker with expanded dynamic sessions, custom font, and more stickers",
   commandCategory: "QTV BOX",
   usages: "[text]",
   cooldowns: 5
@@ -15,13 +15,19 @@ module.exports.handleEvent = async ({ event, api, Users }) => {
   ];
   
   let thread = global.data.threadData.get(event.threadID) || {};
-  if (typeof thread["hi"] === "undefined" || thread["hi"] === false) return;
+  // FIX: Make it ON by default. Only return if it is strictly set to false.
+  if (thread["hi"] === false) return;
   
-  if (event.body && KEY.includes(event.body.toLowerCase())) {
+  // FIX: Added .trim() to catch spaces like "hi " 
+  if (event.body && KEY.includes(event.body.toLowerCase().trim())) {
+    
+    // MASSIVE CUTE STICKER UPDATE
     let data = [
+      // Original Mixed
       "526214684778630", "526220108111421", "526220308111401", "526220484778050",
       "526220691444696", "526220814778017", "526220978111334", "526221104777988",
       "526221318111300", "526221564777942", "526221711444594", "526221971444568",
+      "2041011389459668", "2041011569459650", "2041011726126301", "2041011836126290",
       // Mimi & Friends
       "2039268612981358", "2039269559647930", "2039269786314574", "2039270389647847",
       // Usagyuuun
@@ -30,8 +36,14 @@ module.exports.handleEvent = async ({ event, api, Users }) => {
       "1501140060144941", "1501140086811605", "1501140113478269", "1501140166811597",
       // Ketnipz
       "2111197779140417", "2111197945807067", "2111198032473725", "2111198225807039",
-      // Mixed Originals
-      "2041011389459668", "2041011569459650", "2041011726126301", "2041011836126290"
+      // Milk & Mocha
+      "2011116632289457", "2011116742289446", "2011116935622760", "2011117145622739",
+      "2011117565622697", "2011117765622677", "2011117958955991", "2011118128955974",
+      // Tonton Friends
+      "1488102321287661", "1488102377954322", "1488102461287647", "1488102554620971",
+      "1488102604620966", "1488102717954288", "1488102874620939", "1488103031287590",
+      // Pusheen
+      "1402747163351989", "1402747206685318", "1402747266685312", "1402747310018641"
     ];
     
     let sticker = data[Math.floor(Math.random() * data.length)];
