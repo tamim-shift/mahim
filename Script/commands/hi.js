@@ -1,9 +1,9 @@
 module.exports.config = {
   name: "hi",
-  version: "1.0.6",
+  version: "1.0.7",
   hasPermssion: 0,
   credits: "MAHIM ISLAM",
-  description: "hi sticker with dynamic sessions, custom font, pure FB stickers",
+  description: "hi sticker with dynamic sessions, custom font, and working FB stickers",
   commandCategory: "QTV BOX",
   usages: "[text]",
   cooldowns: 5
@@ -15,37 +15,41 @@ module.exports.handleEvent = async ({ event, api, Users }) => {
   ];
   
   let thread = global.data.threadData.get(event.threadID) || {};
-  // If the group has explicitly turned it off, do nothing.
+  // If the group has explicitly turned it off, do nothing. Fixes comma bug.
   if (thread["hi"] === false) return;
   
-  // CRASH FIX: Ensure event.body exists and is a string before checking it
+  // Safety check to ensure event.body exists and is a string
   if (event.body && typeof event.body === "string") {
     let text = event.body.toLowerCase().trim();
     
     if (KEY.includes(text)) {
       
-      // ONLY Valid Official Facebook Graph Sticker IDs
       let data = [
-        // Qoobee Agapi
+        // Your original working IDs
+        "526214684778630", "526220108111421", "526220308111401", "526220484778050",
+        "526220691444696", "526220814778017", "526220978111334", "526221104777988",
+        "526221318111300", "526221564777942", "526221711444594", "526221971444568",
+        "2041011389459668", "2041011569459650", "2041011726126301", "2041011836126290", 
+        "2041011952792945", "2041012109459596", "2041012262792914", "2041012406126233", 
+        "2041012539459553", "2041012692792871", "2041014432792697", "2041014739459333", 
+        "2041015016125972", "2041015182792622", "2041015329459274", "2041015422792598", 
+        "2041015576125916", "2041017422792398", "2041020049458802", "2041020599458747", 
+        "2041021119458695", "2041021609458646", "2041022029458604", "2041022286125245",
+        
+        // Added pure FB cute stickers (Qoobee, Pusheen, Usagyuuun, Mimi)
         "1501140060144941", "1501140086811605", "1501140113478269", "1501140166811597",
-        // Tonton Friends
-        "1488102321287661", "1488102377954322", "1488102461287647", "1488102554620971",
-        // Pusheen
         "1402747163351989", "1402747206685318", "1402747266685312", "1402747310018641",
-        // Usagyuuun
         "2267597500132338", "2267597530132335", "2267597713465650", "2267597843465637",
-        // Mimi & Friends
-        "2039268612981358", "2039269559647930", "2039269786314574", "2039270389647847",
-        // Default FB Cute Emoticons
-        "369239263222822", "369239303222818", "369239343222814", "369239383222810"
+        "2039268612981358", "2039269559647930", "2039269786314574", "2039270389647847"
       ];
       
       let sticker = data[Math.floor(Math.random() * data.length)];
       
       let moment = require("moment-timezone");
+      // Use Asia/Dhaka for Bangladesh time
       let hours = parseInt(moment.tz('Asia/Dhaka').format('HHmm'));
       
-      // Detailed Bangladesh Time Sessions
+      // Expanded Bangladesh Time Sessions
       let session = (
         hours >= 0 && hours <= 300 ? "midnight" :
         hours > 300 && hours <= 500 ? "early morning" :
@@ -65,7 +69,7 @@ module.exports.handleEvent = async ({ event, api, Users }) => {
       
       let name = await Users.getNameUser(event.senderID);
 
-      // Exact Regular Sans-Serif font mapper requested
+      // Exact Regular Sans-Serif font mapper
       const toSansSerif = (text) => {
         const map = {
           'a': '𝖺', 'b': '𝖻', 'c': '𝖼', 'd': '𝖽', 'e': '𝖾', 'f': '𝖿', 'g': '𝗀', 'h': '𝗁', 'i': '𝗂', 'j': '𝗃', 'k': '𝗄', 'l': '𝗅', 'm': '𝗆', 'n': '𝗇', 'o': '𝗈', 'p': '𝗉', 'q': '𝗊', 'r': '𝗋', 's': '𝗌', 't': '𝗍', 'u': '𝗎', 'v': '𝗏', 'w': '𝗐', 'x': '𝗑', 'y': '𝗒', 'z': '𝗓',
@@ -98,6 +102,7 @@ module.exports.handleEvent = async ({ event, api, Users }) => {
   }
 };
 
+// Removed Vietnamese language, keeping English
 module.exports.languages = {
   "en": {
     "on": "Auto-Hi is now ON",
