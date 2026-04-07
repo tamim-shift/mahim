@@ -218,10 +218,6 @@ module.exports.handleEvent = async function({ api, event, Users }) {
     return api.sendMessage("~ বাল উঠে নাই নাকি তোমার?? 🤖", threadID);
   }
   
-  if (["mahim", "mahim vai", "@mahim.xo.je", "মাহিম"].includes(text)) {
-    return api.sendMessage("উনি এখন কাজে বিজি আছে কি বলবেন আমাকে বলতে পারেন..!😘", threadID);
-  }
-  
   if (["owner", "ceo"].includes(text)) {
     return api.sendMessage("‎[𝐎𝐖𝐍𝐄𝐑:☞ Mahim ッ ☜\n𝚈𝚘𝚞 𝙲𝚊𝚗 𝙲𝚊𝚕𝚕 𝙷𝚒𝚖 Mahim.\nতার ওয়েবসাইট ভিজিট করতে পারো: mahim.xo.je 🌐", threadID);
   }
@@ -252,14 +248,6 @@ module.exports.handleEvent = async function({ api, event, Users }) {
   
   if (["oii", "kire"].includes(text)) {
     return api.sendMessage("কি...? 😒", threadID);
-  }
-  
-  if (["mahi", "mim"].includes(text)) {
-    return api.sendMessage("খবরদার কেউ এই নাম দরে ডাক দিবানা এটা আমার 𝖈𝖗𝖚𝖘𝖍 এর নাম..!😠🥰⛏️", threadID);
-  }
-  
-  if (["mg", "mgi"].includes(text)) {
-    return api.sendMessage("খবরদার কেউ এই নাম দরে ডাক দিবানা এটা আমার বন্ধুর Ex এর নাম..!😠🥰⛏️", threadID);
   }
   
   if (["kiss me"].includes(text)) {
@@ -357,11 +345,7 @@ module.exports.handleEvent = async function({ api, event, Users }) {
   if (["ki obostha", "obostha ki"].includes(text)) {
     return api.sendMessage("অবস্থা তো খুবই টাইট, গার্লফ্রেন্ড নাই তো তাই! 😭", threadID);
   }
-  
-  if (["hi", "hello", "hlw", "hallo", "hey", "hei", "hiii"].includes(text)) {
-    return api.sendMessage("হ্যালো কলিজা! কেমন আছো? 🥰", threadID);
-  }
-  
+
   if (["vai", "bhai", "vaiya", "bhaia"].includes(text)) {
     return api.sendMessage("ভাই ডাকবি না, আমি তোর ক্রাশ! 🙈", threadID);
   }
