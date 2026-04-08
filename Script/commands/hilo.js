@@ -18,7 +18,6 @@ const validateAndNormalize = (amountStr, multiplier = 1) => {
   return { valid: true, formatted: `${num}${SUFFIX_FORMATTED[index]}` };
 };
 
-// Required Bold Serif Font for HiLo
 const toBoldNum = (num) => {
   const map = {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗'};
   return String(num).replace(/[0-9]/g, m => map[m] || m);
@@ -26,7 +25,7 @@ const toBoldNum = (num) => {
 
 module.exports.config = {
   name: "hilo",
-  version: "1.0.0",
+  version: "1.0.1",
   hasPermssion: 0,
   credits: "MAHIM ISLAM",
   description: "Guess if the next number is Higher or Lower",
@@ -46,14 +45,14 @@ module.exports.run = async function ({ api, event, args }) {
     const bet = betInfo.formatted; 
     const uid = event.senderID;
     
-    // Deduct bet FIRST so they can't ignore the message and keep their money
+    // Deduct bet FIRST 
     const deductUrl = `https://mahimcraft.alwaysdata.net/economy/?type=deduct&uid=${uid}&quantity=${bet}&notes=HiLo+Bet`;
     const deductRes = await axios.get(deductUrl);
     if (deductRes.data.status !== "success") {
       return api.sendMessage(`⚠️ | ${deductRes.data.message}`, event.threadID, event.messageID);
     }
 
-    const num1 = Math.floor(Math.random() * 100) + 1; // 1 to 100
+    const num1 = Math.floor(Math.random() * 100) + 1; 
     
     let msg = `🃏 𝐇𝐈𝐆𝐇 𝐎𝐑 𝐋𝐎𝐖 🃏\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
     msg += ` 🔢 𝐂𝐮𝐫𝐫𝐞𝐧𝐭 𝐍𝐮𝐦𝐛𝐞𝐫: [ ${toBoldNum(num1)} ]\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
@@ -101,17 +100,22 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
       isWin = true;
     }
 
-    // Remove the listener so they can't reply twice
     const indexOfHandle = global.client.handleReply.findIndex(e => e.messageID === handleReply.messageID);
     if (indexOfHandle !== -1) global.client.handleReply.splice(indexOfHandle, 1);
 
-    // Payout Logic
-    let multiplier = 0;
-    if (isWin) multiplier = 2; // 2X Profit
-    if (isTie) multiplier = 1; // Refund bet
+    // --- PURE PROFIT LOGIC FIXED ---
+    let pureProfitMultiplier = 0;
+    let addMultiplier = 0; 
 
-    if (multiplier > 0) {
-      const payoutAmount = validateAndNormalize(bet, multiplier).formatted;
+    if (isWin) {
+      pureProfitMultiplier = 2;
+      addMultiplier = pureProfitMultiplier + 1; // Add 3X total (Refunds original 1X + gives 2X pure profit)
+    } else if (isTie) {
+      addMultiplier = 1; // Add 1X total (Refunds the original bet exactly)
+    }
+
+    if (addMultiplier > 0) {
+      const payoutAmount = validateAndNormalize(bet, addMultiplier).formatted;
       const addUrl = `https://mahimcraft.alwaysdata.net/economy/?type=add&uid=${uid}&quantity=${payoutAmount}&notes=HiLo+Win`;
       await new Promise(resolve => setTimeout(resolve, 2000));
       await axios.get(addUrl);
@@ -123,7 +127,7 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
     msg += ` 🆕 𝐍𝐞𝐰 𝐍𝐮𝐦𝐛𝐞𝐫: [ ${toBoldNum(num2)} ]\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
 
     if (isWin) {
-      const profitStr = validateAndNormalize(bet, 2).formatted;
+      const profitStr = validateAndNormalize(bet, pureProfitMultiplier).formatted;
       msg += `✅ 𝐘𝐎𝐔 𝐖𝐎𝐍! (𝟐𝐗)\n➕ 💲${profitStr}`;
     } else if (isTie) {
       msg += `♻️ 𝐈𝐓'𝐒 𝐀 𝐓𝐈𝐄! (𝟏𝐗)\n➕ 💲${bet.toUpperCase()}`;
