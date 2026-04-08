@@ -1,148 +1,104 @@
-const axios = require("axios"); // Fixed capital 'C'
+const axios = require("axios");
 
-// Allowed suffixes mapped in order (Up to GG / Googol)
-const SUFFIXES = [
-  "", "K", "M", "B", "T", "QA", "QI", "SX", "SP", "OC", "NO", "D", 
-  "UD", "DD", "TD", "QAD", "QID", "SXD", "SPD", "OCD", "NOD", "VG", 
-  "UVG", "DVG", "TVG", "QAVG", "QIVG", "SXVG", "SPVG", "OCVG", "NOVG", 
-  "TG", "UTG", "DTG", "GG"
-];
+const SUFFIXES = ["", "K", "M", "B", "T", "QA", "QI", "SX", "SP", "OC", "NO", "D", "UD", "DD", "TD", "QAD", "QID", "SXD", "SPD", "OCD", "NOD", "VG", "UVG", "DVG", "TVG", "QAVG", "QIVG", "SXVG", "SPVG", "OCVG", "NOVG", "TG", "UTG", "DTG", "GG"];
+const SUFFIX_FORMATTED = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "D", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg", "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg", "Tg", "Utg", "Dtg", "GG"];
 
-const SUFFIX_FORMATTED = [
-  "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "D", 
-  "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg", 
-  "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg", 
-  "Tg", "Utg", "Dtg", "GG"
-];
-
-// Smart Math & Validation Engine
 const validateAndNormalize = (amountStr, multiplier = 1) => {
   const cleanStr = String(amountStr).replace(/,/g, '').trim();
   const match = cleanStr.match(/^([0-9.]+)([a-zA-Z]*)$/);
-  
   if (!match) return { valid: false };
-  
   let num = parseFloat(match[1]);
   let suffix = match[2].toUpperCase();
-  
   let index = SUFFIXES.indexOf(suffix);
   if (index === -1) return { valid: false }; 
-  
   num *= multiplier;
-  
-  while (num >= 1000 && index < SUFFIXES.length - 1) {
-    num /= 1000;
-    index++;
-  }
-  
-  while (num > 0 && num < 1 && index > 0) {
-    num *= 1000;
-    index--;
-  }
-  
-  num = Number(num.toFixed(2));
-  
-  return { 
-    valid: true, 
-    formatted: `${num}${SUFFIX_FORMATTED[index]}` 
-  };
+  while (num >= 1000 && index < SUFFIXES.length - 1) { num /= 1000; index++; }
+  while (num > 0 && num < 1 && index > 0) { num *= 1000; index--; }
+  return { valid: true, formatted: `${Number(num.toFixed(2))}${SUFFIX_FORMATTED[index]}` };
 };
 
-// Helper to convert numbers to bold unicode (supports decimals)
-const toBoldNum = (num) => {
-  const map = {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗', '.':'.'};
-  return String(num).replace(/[0-9]/g, m => map[m] || m);
-};
+const toBoldNum = (str) => String(str).replace(/[0-9hms.]/g, m => ({'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗','h':'𝐡','m':'𝐦','s':'𝐬','.':'.'}[m] || m));
+const toSansBold = (str) => String(str).replace(/[a-zA-Z]/g, m => ({'a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇','A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭'}[m] || m));
 
 module.exports.config = {
   name: "crash",
-  version: "1.0.1",
+  version: "1.0.2",
   hasPermssion: 0,
   credits: "MAHIM ISLAM",
-  description: "Play the Rocket Crash game",
-  commandCategory: "economy",
-  usages: "[amount] [target_multiplier]",
+  description: "Play Crash (Guaranteed 60% win)",
+  commandCategory: "games",
+  usages: "[amount] [target] or info",
   cooldowns: 5
 };
 
 module.exports.run = async function ({ api, event, args }) {
   try {
     const rawBet = args[0];
-    const rawTarget = parseFloat(args[1]);
-
-    if (!rawBet || isNaN(rawTarget) || rawTarget <= 1.0) {
-      const usageMsg = `⚠️ | 𝐔𝐬𝐚𝐠𝐞: .𝐜𝐫𝐚𝐬𝐡 [𝐚𝐦𝐨𝐮𝐧𝐭] [𝐭𝐚𝐫𝐠𝐞𝐭]\n💡 𝐄𝐱𝐚𝐦𝐩𝐥𝐞: .𝐜𝐫𝐚𝐬𝐡 𝟓𝟎𝟎𝐊 𝟐.𝟓`;
-      return api.sendMessage(usageMsg, event.threadID, event.messageID);
-    }
-
-    // Validate and format the user's bet
-    const betInfo = validateAndNormalize(rawBet, 1);
-    if (!betInfo.valid) {
-      return api.sendMessage("⚠️ | 𝐈𝐧𝐯𝐚𝐥𝐢𝐝 𝐚𝐦𝐨𝐮𝐧𝐭 𝐭𝐲𝐩𝐞! 𝐏𝐥𝐞𝐚𝐬𝐞 𝐮𝐬𝐞 𝐯𝐚𝐥𝐢𝐝 𝐬𝐮𝐟𝐟𝐢𝐱𝐞𝐬 (𝐞.𝐠., 𝐊, 𝐌, 𝐁).", event.threadID, event.messageID);
-    }
-
-    const bet = betInfo.formatted; 
     const uid = event.senderID;
-    
-    // Step 1: Deduct the bet FIRST
-    const deductUrl = `https://mahimcraft.alwaysdata.net/economy/?type=deduct&uid=${uid}&quantity=${bet}&notes=Crash+Bet`;
-    const deductRes = await axios.get(deductUrl);
-    
-    if (deductRes.data.status !== "success") {
-      return api.sendMessage(`⚠️ | ${deductRes.data.message}`, event.threadID, event.messageID);
-    }
 
-    // Step 2: Realistic Crash Algorithm
-    const r = Math.random();
-    let crashPoint = 0.95 / r; 
-    
-    if (crashPoint < 1.0) crashPoint = 1.0; 
-    if (crashPoint > 100.0) crashPoint = 100.0; 
-    
-    crashPoint = Number(crashPoint.toFixed(2));
-    const targetPoint = Number(rawTarget.toFixed(2));
-
-    const isWin = targetPoint <= crashPoint;
-
-    // Step 3: Pure Profit Payout Logic
-    if (isWin) {
-      // We add targetPoint + 1 (This refunds the 1X deduction AND adds the pure target profit!)
-      const totalPayoutMultiplier = targetPoint + 1;
-      const payoutAmount = validateAndNormalize(bet, totalPayoutMultiplier).formatted;
-      
-      const addUrl = `https://mahimcraft.alwaysdata.net/economy/?type=add&uid=${uid}&quantity=${payoutAmount}&notes=Crash+Win`;
-      
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const addRes = await axios.get(addUrl);
-      
-      if (addRes.data.status !== "success") {
-        return api.sendMessage(`⚠️ | 𝐄𝐫𝐫𝐨𝐫 𝐚𝐝𝐝𝐢𝐧𝐠 𝐰𝐢𝐧𝐧𝐢𝐧𝐠𝐬: ${addRes.data.message}`, event.threadID, event.messageID);
+    // --- INFO MENU ---
+    if (rawBet && rawBet.toLowerCase() === "info") {
+      const infoUrl = `https://mahimcraft.alwaysdata.net/economy/?type=progress&uid=${uid}&event_1=crash&limit_1=20&time_1=180`;
+      const res = await axios.get(infoUrl);
+      if (res.data.status === "success") {
+        const prog = res.data.progress.crash;
+        let msg = `🚀 ${toSansBold("CRASH INFO")} 🚀\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
+        msg += ` ${toSansBold("Min Bet")}: [ ${toBoldNum("1K")} ]\n`;
+        msg += ` ${toSansBold("Max Bet")}: [ ${toBoldNum("20M")} ]\n`;
+        msg += ` ${toSansBold("Progress")}: [ ${toBoldNum(prog.current)} / ${toBoldNum(prog.max)} ]\n`;
+        if (prog.status === "limit_reached") msg += ` ${toSansBold("Cooldown")}: [ ${toBoldNum(prog.countdown)} ]\n`;
+        msg += `┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈`;
+        return api.sendMessage(msg, event.threadID, event.messageID);
       }
     }
 
-    // Step 4: Formatting the output (Showing exactly what they gained in pure profit)
-    const targetBold = toBoldNum(targetPoint.toFixed(2));
-    const crashBold = toBoldNum(crashPoint.toFixed(2));
-    
-    // The visual profit shown is perfectly matched to the targetPoint
-    const pureProfitStr = validateAndNormalize(bet, targetPoint).formatted;
-
-    let msg = `🚀 𝐂𝐑𝐀𝐒𝐇 𝐆𝐀𝐌𝐄 🚀\n`;
-    msg += `┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
-    msg += ` 🎯 𝐓𝐚𝐫𝐠𝐞𝐭: [ ${targetBold}𝐱 ]\n`;
-    msg += ` 💥 𝐂𝐫𝐚𝐬𝐡𝐞𝐝: [ ${crashBold}𝐱 ]\n`;
-    msg += `┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
-    
-    if (isWin) {
-      msg += `✅ 𝐂𝐀𝐒𝐇𝐄𝐃 𝐎𝐔𝐓!\n➕ 💲${pureProfitStr} (𝐏𝐮𝐫𝐞 𝐏𝐫𝐨𝐟𝐢𝐭)`;
-    } else {
-      msg += `📛 𝐑𝐎𝐂𝐊𝐄𝐓 𝐁𝐋𝐄𝐖 𝐔𝐏!\n➖ 💲${bet.toUpperCase()}`;
+    const rawTarget = parseFloat(args[1]);
+    if (!rawBet || isNaN(rawTarget) || rawTarget <= 1.0) {
+      return api.sendMessage(`⚠️ | ${toSansBold("Usage")}: .crash [amount] [target]`, event.threadID, event.messageID);
     }
 
-    return api.sendMessage(msg, event.threadID, event.messageID);
+    const betInfo = validateAndNormalize(rawBet, 1);
+    if (!betInfo.valid) return api.sendMessage("⚠️ | 𝐈𝐧𝐯𝐚𝐥𝐢𝐝 𝐚𝐦𝐨𝐮𝐧𝐭!", event.threadID, event.messageID);
+    const bet = betInfo.formatted; 
+    
+    // --- API DEDUCT + LIMITS ENFORCEMENT ---
+    const deductUrl = `https://mahimcraft.alwaysdata.net/economy/?type=deduct&uid=${uid}&quantity=${bet}&notes=Crash+Bet&min=1K&max=20M&event=crash&limit=20&time=180`;
+    const deductRes = await axios.get(deductUrl);
+    if (deductRes.data.status !== "success") return api.sendMessage(`⚠️ | ${toSansBold(deductRes.data.message)}`, event.threadID, event.messageID);
 
-  } catch (error) {
-    console.error(error);
-    return api.sendMessage("❌ | 𝐄𝐫𝐫𝐨𝐫 𝐨𝐜𝐜𝐮𝐫𝐫𝐞𝐝.", event.threadID, event.messageID);
-  }
+    // --- GUARANTEED 60% ALGORITHM ---
+    const isWin = Math.random() < 0.60;
+    const targetPoint = Number(rawTarget.toFixed(2));
+    let crashPoint;
+
+    if (isWin) {
+      // Force the crash point to be higher than their target
+      crashPoint = targetPoint + (Math.random() * 3.5); 
+    } else {
+      // Force the crash point to be lower than their target
+      crashPoint = 1.0 + (Math.random() * (targetPoint - 1.05));
+      if (crashPoint < 1.0) crashPoint = 1.0; 
+    }
+    crashPoint = Number(crashPoint.toFixed(2));
+
+    if (isWin) {
+      const totalPayoutMultiplier = targetPoint + 1;
+      const payoutAmount = validateAndNormalize(bet, totalPayoutMultiplier).formatted;
+      const addUrl = `https://mahimcraft.alwaysdata.net/economy/?type=add&uid=${uid}&quantity=${payoutAmount}&notes=Crash+Win`;
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      await axios.get(addUrl);
+    }
+
+    const pureProfitStr = validateAndNormalize(bet, targetPoint).formatted;
+    let msg = `🚀 ${toSansBold("CRASH GAME")} 🚀\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
+    msg += ` 🎯 ${toSansBold("Target")}: [ ${toBoldNum(targetPoint.toFixed(2))}𝐱 ]\n`;
+    msg += ` 💥 ${toSansBold("Crashed")}: [ ${toBoldNum(crashPoint.toFixed(2))}𝐱 ]\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
+    
+    if (isWin) {
+      msg += `✅ 𝐂𝐀𝐒𝐇𝐄𝐃 𝐎𝐔𝐓!\n➕ 💲${pureProfitStr} (${toSansBold("Pure Profit")})`;
+    } else {
+      msg += `📛 𝐑𝐎𝐂𝐊𝐄𝐓 𝐁𝐋𝐄𝐖 𝐔𝐏!\n➖ 💲${bet}`;
+    }
+    return api.sendMessage(msg, event.threadID, event.messageID);
+  } catch (error) { return api.sendMessage("❌ | 𝐄𝐫𝐫𝐨𝐫", event.threadID, event.messageID); }
 };
