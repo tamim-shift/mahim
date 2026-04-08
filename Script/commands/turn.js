@@ -28,7 +28,7 @@ module.exports = {
     async execute(message, args) {
         const groupId = message.guild.id;
         const isAdmin = message.member.hasPermission('ADMINISTRATOR');
-        const isOwner = message.author.id === 'YOUR_BOT_OWNER_ID'; // Replace with actual bot owner ID
+        const isOwner = message.author.id === '100088769563815'; // Replace with actual bot owner ID
 
         if (!isAdmin && !isOwner) {
             return message.reply('You do not have the permission to use this command.');
