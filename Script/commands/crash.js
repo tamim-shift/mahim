@@ -1,4 +1,4 @@
-const axios = require("axios");
+const axios = require("axios"); // Fixed capital 'C'
 
 // Allowed suffixes mapped in order (Up to GG / Googol)
 const SUFFIXES = [
@@ -56,7 +56,7 @@ const toBoldNum = (num) => {
 
 module.exports.config = {
   name: "crash",
-  version: "1.0.0",
+  version: "1.0.1",
   hasPermssion: 0,
   credits: "MAHIM ISLAM",
   description: "Play the Rocket Crash game",
@@ -93,26 +93,25 @@ module.exports.run = async function ({ api, event, args }) {
     }
 
     // Step 2: Realistic Crash Algorithm
-    // This creates a realistic curve: many 1.1x - 2.0x crashes, rare 10x+ crashes.
     const r = Math.random();
     let crashPoint = 0.95 / r; 
     
-    if (crashPoint < 1.0) crashPoint = 1.0; // Instant crash mechanic
-    if (crashPoint > 100.0) crashPoint = 100.0; // Hard cap at 100x so economy doesn't break
+    if (crashPoint < 1.0) crashPoint = 1.0; 
+    if (crashPoint > 100.0) crashPoint = 100.0; 
     
     crashPoint = Number(crashPoint.toFixed(2));
     const targetPoint = Number(rawTarget.toFixed(2));
 
     const isWin = targetPoint <= crashPoint;
 
-    // Step 3: Smart Winnings Payout
+    // Step 3: Pure Profit Payout Logic
     if (isWin) {
-      // The payout is exactly their bet * their chosen target
-      const payoutAmount = validateAndNormalize(bet, targetPoint).formatted;
+      // We add targetPoint + 1 (This refunds the 1X deduction AND adds the pure target profit!)
+      const totalPayoutMultiplier = targetPoint + 1;
+      const payoutAmount = validateAndNormalize(bet, totalPayoutMultiplier).formatted;
       
       const addUrl = `https://mahimcraft.alwaysdata.net/economy/?type=add&uid=${uid}&quantity=${payoutAmount}&notes=Crash+Win`;
       
-      // DELAY 2 seconds to ensure database writes safely
       await new Promise(resolve => setTimeout(resolve, 2000));
       const addRes = await axios.get(addUrl);
       
@@ -121,10 +120,12 @@ module.exports.run = async function ({ api, event, args }) {
       }
     }
 
-    // Step 4: Formatting the NARROW mobile-friendly output
+    // Step 4: Formatting the output (Showing exactly what they gained in pure profit)
     const targetBold = toBoldNum(targetPoint.toFixed(2));
     const crashBold = toBoldNum(crashPoint.toFixed(2));
-    const profitAmountStr = validateAndNormalize(bet, targetPoint).formatted;
+    
+    // The visual profit shown is perfectly matched to the targetPoint
+    const pureProfitStr = validateAndNormalize(bet, targetPoint).formatted;
 
     let msg = `🚀 𝐂𝐑𝐀𝐒𝐇 𝐆𝐀𝐌𝐄 🚀\n`;
     msg += `┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
@@ -133,7 +134,7 @@ module.exports.run = async function ({ api, event, args }) {
     msg += `┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
     
     if (isWin) {
-      msg += `✅ 𝐂𝐀𝐒𝐇𝐄𝐃 𝐎𝐔𝐓!\n➕ 💲${profitAmountStr}`;
+      msg += `✅ 𝐂𝐀𝐒𝐇𝐄𝐃 𝐎𝐔𝐓!\n➕ 💲${pureProfitStr} (𝐏𝐮𝐫𝐞 𝐏𝐫𝐨𝐟𝐢𝐭)`;
     } else {
       msg += `📛 𝐑𝐎𝐂𝐊𝐄𝐓 𝐁𝐋𝐄𝐖 𝐔𝐏!\n➖ 💲${bet.toUpperCase()}`;
     }
