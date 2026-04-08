@@ -12,7 +12,7 @@ const triggers = [
 
 module.exports.config = {
   name: "baby",
-  version: "1.0.8",
+  version: "1.0.9",
   hasPermssion: 0,
   credits: "Modified by MAHIM ISLAM",
   description: "Cute AI Baby Chatbot with custom API & smart matching",
@@ -58,7 +58,9 @@ async function fetchAndSendSimSimi(api, event, text, senderName) {
 module.exports.run = async function ({ api, event, args, Users }) {
   try {
     const uid = event.senderID;
-    const senderName = await Users.getNameUser(uid);
+    let senderName = "Babu";
+    try { senderName = await Users.getNameUser(uid); } catch(e) {}
+
     const rawQuery = args.join(" ");
     const query = rawQuery.toLowerCase().trim();
 
@@ -106,9 +108,7 @@ module.exports.run = async function ({ api, event, args, Users }) {
         try {
           const threadInfo = await api.getThreadInfo(groupID);
           if (threadInfo && threadInfo.threadName) groupName = threadInfo.threadName.trim();
-        } catch (error) {
-          console.error(`Error fetching thread info for ID ${groupID}:`, error);
-        }
+        } catch (error) {}
       }
 
       let teachUrl = `${simsim}/teach?ask=${encodeURIComponent(ask)}&ans=${encodeURIComponent(ans)}&senderID=${uid}&senderName=${encodeURIComponent(senderName)}&groupID=${encodeURIComponent(groupID)}`;
@@ -135,32 +135,25 @@ module.exports.handleEvent = async function ({ api, event, Users }) {
     const raw = event.body.toLowerCase().trim();
     if (!raw) return;
 
-    // 🛑 SAFE IGNORER BLOCK: Filters out empty strings so it doesn't break! 🛑
-    let botPrefix = "."; // Fallback prefix
-    if (global && global.config && typeof global.config.PREFIX === "string") {
-      botPrefix = global.config.PREFIX;
+    // 🛑 BULLETPROOF PREFIX IGNORER
+    let prefix = ".";
+    if (typeof global !== "undefined" && global.config && global.config.PREFIX) {
+      prefix = global.config.PREFIX;
     }
-    
-    // Make sure we only check valid, non-empty prefix symbols
-    const prefixesToIgnore = [botPrefix, "/", "!", "#", "?"].filter(p => p && p.trim() !== "");
-    
-    if (prefixesToIgnore.some(p => raw.startsWith(p))) {
-      return; // Stop if it's a real bot command
-    }
-
-    const senderName = await Users.getNameUser(event.senderID);
-    const senderID = event.senderID;
+    // Ignore if it starts with the bot prefix or common command symbols
+    if (raw.startsWith(prefix) || /^[/!#?]/.test(raw)) return;
 
     // 1. EXACT MATCH: (e.g., just "baby" or "bot")
     if (triggers.includes(raw)) {
+      let senderName = "Babu";
+      try { senderName = await Users.getNameUser(event.senderID); } catch(e) {} // Fetches name ONLY when needed
+      
       const randomReply = await fetchRandomGreeting();
       const mention = {
         body: `${randomReply} @${senderName}`,
-        mentions: [{
-          tag: `@${senderName}`,
-          id: senderID
-        }]
+        mentions: [{ tag: `@${senderName}`, id: event.senderID }]
       };
+
       return api.sendMessage(mention, event.threadID, event.messageID);
     }
 
@@ -179,11 +172,11 @@ module.exports.handleEvent = async function ({ api, event, Users }) {
       const query = raw.replace(regex, ' ').trim();
       
       const firstWord = (query.split(/\s+/)[0] || "").toLowerCase();
-      if (["teach", "edit", "rm", "remove", "list"].includes(firstWord)) {
-          return;
-      }
+      if (["teach", "edit", "rm", "remove", "list"].includes(firstWord)) return;
       
       if (query) {
+        let senderName = "Babu";
+        try { senderName = await Users.getNameUser(event.senderID); } catch(e) {} // Fetches name ONLY when needed
         await fetchAndSendSimSimi(api, event, query, senderName);
       }
     }
