@@ -14,105 +14,137 @@ const validateAndNormalize = (amountStr, multiplier = 1) => {
   num *= multiplier;
   while (num >= 1000 && index < SUFFIXES.length - 1) { num /= 1000; index++; }
   while (num > 0 && num < 1 && index > 0) { num *= 1000; index--; }
-  num = Number(num.toFixed(2));
-  return { valid: true, formatted: `${num}${SUFFIX_FORMATTED[index]}` };
+  return { valid: true, formatted: `${Number(num.toFixed(2))}${SUFFIX_FORMATTED[index]}` };
 };
 
-const toBoldNum = (num) => {
-  const map = {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗'};
-  return String(num).replace(/[0-9]/g, m => map[m] || m);
-};
+// Font Helpers
+const toBoldNum = (str) => String(str).replace(/[0-9hms]/g, m => ({'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗','h':'𝐡','m':'𝐦','s':'𝐬'}[m] || m));
+const toSansBold = (str) => String(str).replace(/[a-zA-Z]/g, m => ({'a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻','o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇','A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡','O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭'}[m] || m));
+const toSansNormal = (str) => String(str).replace(/[a-zA-Z]/g, m => ({'a':'𝖺','b':'𝖻','c':'𝖼','d':'𝖽','e':'𝖾','f':'𝖿','g':'𝗀','h':'𝗁','i':'𝗂','j':'𝗃','k':'𝗄','l':'𝗅','m':'𝗆','n':'𝗇','o':'𝗈','p':'𝗉','q':'𝗊','r':'𝗋','s':'𝗌','t':'𝗍','u':'𝗎','v':'𝗏','w':'𝗐','x':'𝗑','y':'𝗒','z':'𝗓','A':'𝖠','B':'𝖡','C':'𝖢','D':'𝖣','E':'𝖤','F':'𝖥','G':'𝖦','H':'𝖧','I':'𝖨','J':'𝖩','K':'𝖪','L':'𝖫','M':'𝖬','N':'𝖭','O':'𝖮','P':'𝖯','Q':'𝖰','R':'𝖱','S':'𝖲','T':'𝖳','U':'𝖴','V':'𝖵','W':'𝖶','X':'𝖷','Y':'𝖸','Z':'𝖹'}[m] || m));
+
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 module.exports.config = {
   name: "hilo",
-  version: "1.0.1",
+  version: "1.3.1",
   hasPermssion: 0,
   credits: "MAHIM ISLAM",
-  description: "Guess if the next number is Higher or Lower",
-  commandCategory: "economy",
-  usages: "[bet]",
+  description: "Guess Higher or Lower using reactions",
+  commandCategory: "games",
+  usages: "[bet] or info",
   cooldowns: 5
 };
 
 module.exports.run = async function ({ api, event, args }) {
   try {
     const rawBet = args[0];
-    if (!rawBet) return api.sendMessage("⚠️ | 𝐄𝐧𝐭𝐞𝐫 𝐛𝐞𝐭 𝐚𝐦𝐨𝐮𝐧𝐭.", event.threadID, event.messageID);
+    if (!rawBet) return api.sendMessage("⚠️ | 𝐄𝐧𝐭𝐞𝐫 𝐛𝐞𝐭 𝐚𝐦𝐨𝐮𝐧𝐭 𝐨𝐫 '𝐢𝐧𝐟𝐨'.", event.threadID, event.messageID);
+    const uid = event.senderID;
+
+    // --- INFO MENU ---
+    if (rawBet.toLowerCase() === "info") {
+      const infoUrl = `https://mahimcraft.alwaysdata.net/economy/?type=progress&uid=${uid}&event_1=hilo&limit_1=20&time_1=180`;
+      const res = await axios.get(infoUrl);
+      if (res.data.status === "success") {
+        const prog = res.data.progress.hilo;
+        let msg = `🃏 ${toSansBold("HILO INFO")} 🃏\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
+        msg += ` ${toSansBold("Min Bet")}: [ ${toBoldNum("1K")} ]\n`;
+        msg += ` ${toSansBold("Max Bet")}: [ ${toBoldNum("20M")} ]\n`;
+        msg += ` ${toSansBold("Progress")}: [ ${toBoldNum(prog.current)} / ${toBoldNum(prog.max)} ]\n`;
+        if (prog.status === "limit_reached") msg += ` ${toSansBold("Cooldown")}: [ ${toBoldNum(prog.countdown)} ]\n`;
+        msg += `┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈`;
+        return api.sendMessage(msg, event.threadID, event.messageID);
+      }
+    }
 
     const betInfo = validateAndNormalize(rawBet, 1);
-    if (!betInfo.valid) return api.sendMessage("⚠️ | 𝐈𝐧𝐯𝐚𝐥𝐢𝐝 𝐚𝐦𝐨𝐮𝐧𝐭.", event.threadID, event.messageID);
-
+    if (!betInfo.valid) return api.sendMessage("⚠️ | 𝐈𝐧𝐯𝐚𝐥𝐢𝐝 𝐚𝐦𝐨𝐮𝐧𝐭!", event.threadID, event.messageID);
     const bet = betInfo.formatted; 
-    const uid = event.senderID;
     
-    // Deduct bet FIRST 
-    const deductUrl = `https://mahimcraft.alwaysdata.net/economy/?type=deduct&uid=${uid}&quantity=${bet}&notes=HiLo+Bet`;
+    // --- API DEDUCT + LIMITS ENFORCEMENT ---
+    const deductUrl = `https://mahimcraft.alwaysdata.net/economy/?type=deduct&uid=${uid}&quantity=${bet}&notes=HiLo+Bet&min=1K&max=20M&event=hilo&limit=20&time=180`;
     const deductRes = await axios.get(deductUrl);
-    if (deductRes.data.status !== "success") {
-      return api.sendMessage(`⚠️ | ${deductRes.data.message}`, event.threadID, event.messageID);
-    }
+    if (deductRes.data.status !== "success") return api.sendMessage(`⚠️ | ${toSansBold(deductRes.data.message)}`, event.threadID, event.messageID);
 
-    const num1 = Math.floor(Math.random() * 100) + 1; 
+    const num1 = randomInt(1, 100); 
     
-    let msg = `🃏 𝐇𝐈𝐆𝐇 𝐎𝐑 𝐋𝐎𝐖 🃏\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
-    msg += ` 🔢 𝐂𝐮𝐫𝐫𝐞𝐧𝐭 𝐍𝐮𝐦𝐛𝐞𝐫: [ ${toBoldNum(num1)} ]\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
-    msg += `👉 𝐑𝐞𝐩𝐥𝐲 𝐭𝐨 𝐭𝐡𝐢𝐬 𝐦𝐞𝐬𝐬𝐚𝐠𝐞 𝐰𝐢𝐭𝐡 𝐇 (𝐇𝐢𝐠𝐡𝐞𝐫) 𝐨𝐫 𝐋 (𝐋𝐨𝐰𝐞𝐫)!`;
+    let msg = `🃏 ${toSansBold("HIGH OR LOW")} 🃏\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
+    msg += ` 🔢 ${toSansBold("Current Number")}: [ ${toBoldNum(num1)} ]\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
+    // Updated to use 👍 and 😮 (Wow)
+    msg += ` ${toSansNormal("React with")} 👍 ${toSansNormal("for Higher or")} 😮 ${toSansNormal("for Lower")}`;
 
-    api.sendMessage(msg, event.threadID, (error, info) => {
+    return api.sendMessage(msg, event.threadID, async (error, info) => {
       if (!error) {
-        global.client.handleReply.push({
+        global.client.handleReaction.push({
           name: this.config.name,
           messageID: info.messageID,
-          author: event.senderID,
+          author: uid,
           betAmount: bet,
-          firstNumber: num1
+          firstNumber: num1,
+          answerYet: 0
         });
+
+        // 30 SECOND TIMEOUT
+        await new Promise(resolve => setTimeout(resolve, 30 * 1000));
+        const indexOfHandle = global.client.handleReaction.findIndex(e => e.messageID === info.messageID);
+        if (indexOfHandle !== -1) {
+          let data = global.client.handleReaction[indexOfHandle];
+          if (data.answerYet === 0) {
+            global.client.handleReaction.splice(indexOfHandle, 1);
+            return api.sendMessage(`⏳ | ${toSansBold("Time out! You took too long and lost your bet.")}\n➖ 💲${bet}`, event.threadID, info.messageID);
+          }
+        }
       }
     }, event.messageID);
-
-  } catch (error) {
-    return api.sendMessage("❌ | 𝐄𝐫𝐫𝐨𝐫 𝐨𝐜𝐜𝐮𝐫𝐫𝐞𝐝.", event.threadID, event.messageID);
-  }
+  } catch (error) { return api.sendMessage("❌ | 𝐄𝐫𝐫𝐨𝐫", event.threadID, event.messageID); }
 };
 
-module.exports.handleReply = async function ({ api, event, handleReply }) {
+module.exports.handleReaction = async function ({ api, event, handleReaction }) {
   try {
-    if (event.senderID !== handleReply.author) return;
+    if (event.userID !== handleReaction.author) return;
 
-    const choice = event.body.trim().toUpperCase();
-    if (choice !== "H" && choice !== "L") {
-      return api.sendMessage("⚠️ | 𝐏𝐥𝐞𝐚𝐬𝐞 𝐫𝐞𝐩𝐥𝐲 𝐨𝐧𝐥𝐲 𝐰𝐢𝐭𝐡 '𝐇' 𝐨𝐫 '𝐋'.", event.threadID, event.messageID);
+    let choice = "";
+    // Updated to match 👍 and 😮
+    if (event.reaction === "👍") choice = "H";
+    else if (event.reaction === "😮") choice = "L";
+    else return; // Ignore other reactions
+
+    handleReaction.answerYet = 1;
+
+    const num1 = handleReaction.firstNumber;
+    const bet = handleReaction.betAmount;
+    const uid = event.userID;
+
+    // --- GUARANTEED 60% ALGORITHM ---
+    const forceWin = Math.random() < 0.60;
+    let num2;
+
+    if (forceWin) {
+      if (choice === "H") num2 = randomInt(num1 + 1, 100);
+      else num2 = randomInt(1, num1 - 1);
+    } else {
+      if (choice === "H") num2 = randomInt(1, num1);
+      else num2 = randomInt(num1, 100);
     }
 
-    const num1 = handleReply.firstNumber;
-    const bet = handleReply.betAmount;
-    const num2 = Math.floor(Math.random() * 100) + 1;
-    const uid = event.senderID;
+    if (num2 > 100) num2 = 100;
+    if (num2 < 1) num2 = 1;
+    if (isNaN(num2)) num2 = num1; 
 
     let isWin = false;
     let isTie = false;
+    if (num2 === num1) isTie = true;
+    else if (choice === "H" && num2 > num1) isWin = true;
+    else if (choice === "L" && num2 < num1) isWin = true;
 
-    if (num2 === num1) {
-      isTie = true;
-    } else if (choice === "H" && num2 > num1) {
-      isWin = true;
-    } else if (choice === "L" && num2 < num1) {
-      isWin = true;
-    }
+    // Remove listener
+    const indexOfHandle = global.client.handleReaction.findIndex(e => e.messageID === handleReaction.messageID);
+    if (indexOfHandle !== -1) global.client.handleReaction.splice(indexOfHandle, 1);
 
-    const indexOfHandle = global.client.handleReply.findIndex(e => e.messageID === handleReply.messageID);
-    if (indexOfHandle !== -1) global.client.handleReply.splice(indexOfHandle, 1);
-
-    // --- PURE PROFIT LOGIC FIXED ---
     let pureProfitMultiplier = 0;
     let addMultiplier = 0; 
-
-    if (isWin) {
-      pureProfitMultiplier = 2;
-      addMultiplier = pureProfitMultiplier + 1; // Add 3X total (Refunds original 1X + gives 2X pure profit)
-    } else if (isTie) {
-      addMultiplier = 1; // Add 1X total (Refunds the original bet exactly)
-    }
+    if (isWin) { pureProfitMultiplier = 2; addMultiplier = 3; } 
+    else if (isTie) { addMultiplier = 1; }
 
     if (addMultiplier > 0) {
       const payoutAmount = validateAndNormalize(bet, addMultiplier).formatted;
@@ -121,23 +153,19 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
       await axios.get(addUrl);
     }
 
-    // Format output
-    let msg = `🃏 𝐇𝐈𝐆𝐇 𝐎𝐑 𝐋𝐎𝐖 🃏\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
-    msg += ` 🔢 𝐎𝐥𝐝 𝐍𝐮𝐦𝐛𝐞𝐫: [ ${toBoldNum(num1)} ]\n`;
-    msg += ` 🆕 𝐍𝐞𝐰 𝐍𝐮𝐦𝐛𝐞𝐫: [ ${toBoldNum(num2)} ]\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
+    let msg = `🃏 ${toSansBold("HIGH OR LOW")} 🃏\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
+    msg += ` 🔢 ${toSansBold("Old Number")}: [ ${toBoldNum(num1)} ]\n`;
+    msg += ` 🆕 ${toSansBold("New Number")}: [ ${toBoldNum(num2)} ]\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
 
     if (isWin) {
       const profitStr = validateAndNormalize(bet, pureProfitMultiplier).formatted;
-      msg += `✅ 𝐘𝐎𝐔 𝐖𝐎𝐍! (𝟐𝐗)\n➕ 💲${profitStr}`;
+      msg += `✅ 𝐘𝐎𝐔 𝐖𝐎𝐍! (𝟐𝐗)\n➕ 💲${profitStr} (${toSansBold("Pure Profit")})`;
     } else if (isTie) {
       msg += `♻️ 𝐈𝐓'𝐒 𝐀 𝐓𝐈𝐄! (𝟏𝐗)\n➕ 💲${bet.toUpperCase()}`;
     } else {
       msg += `📛 𝐘𝐎𝐔 𝐋𝐎𝐒𝐓!\n➖ 💲${bet.toUpperCase()}`;
     }
-
-    return api.sendMessage(msg, event.threadID, event.messageID);
-
-  } catch (error) {
-    return api.sendMessage("❌ | 𝐄𝐫𝐫𝐨𝐫 𝐨𝐜𝐜𝐮𝐫𝐫𝐞𝐝.", event.threadID, event.messageID);
-  }
+    
+    return api.sendMessage(msg, event.threadID);
+  } catch (error) { return api.sendMessage("❌ | 𝐄𝐫𝐫𝐨𝐫", event.threadID); }
 };
