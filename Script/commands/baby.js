@@ -6,7 +6,7 @@ const botApi = "https://mahimcraft.alwaysdata.net/simsim/bot/"; // Your custom r
 const triggers = [
   "baby", "bby", "pakhi", "jan", "xan",
   "babu", "bb", "sona", "janu", "jaan",
-  "bebu", "babe", "babyy", "botu", "bot",
+  "bebu", "babe", "babyy", "botu", "xaan",
   "বেবি", "বেবী", "বট", "জান", "জানু",
   "সোনা", "বাবু", "বেবু", "বাবাই", "জানুু"
 ];
