@@ -1,6 +1,5 @@
 const axios = require("axios");
 
-// Allowed suffixes mapped in order (Up to GG / Googol)
 const SUFFIXES = [
   "", "K", "M", "B", "T", "QA", "QI", "SX", "SP", "OC", "NO", "D", 
   "UD", "DD", "TD", "QAD", "QID", "SXD", "SPD", "OCD", "NOD", "VG", 
@@ -14,7 +13,6 @@ const SUFFIX_FORMATTED = [
   "Tg", "Utg", "Dtg", "GG"
 ];
 
-// Smart Math & Validation Engine
 const validateAndNormalize = (amountStr, multiplier = 1) => {
   const cleanStr = String(amountStr).replace(/,/g, '').trim();
   const match = cleanStr.match(/^([0-9.]+)([a-zA-Z]*)$/);
@@ -30,28 +28,28 @@ const validateAndNormalize = (amountStr, multiplier = 1) => {
   return { valid: true, formatted: `${num}${SUFFIX_FORMATTED[index]}` };
 };
 
-// Loot Table (Exactly 50% Trash, 50% Fish)
+// Loot Table (Pure Profit values)
 const LOOT_TABLE = [
-  // --- 50% TRASH (0X MULTIPLIER) ---
-  { name: "𝐓𝐀𝐍𝐆𝐋𝐄𝐃 𝐒𝐄𝐀𝐖𝐄𝐄𝐃", emoji: "🌿", multi: 0, chance: 15 },
-  { name: "𝐎𝐋𝐃 𝐁𝐎𝐎𝐓", emoji: "🥾", multi: 0, chance: 10 },
-  { name: "𝐑𝐔𝐒𝐓𝐘 𝐂𝐀𝐍", emoji: "🥫", multi: 0, chance: 10 },
-  { name: "𝐏𝐋𝐀𝐒𝐓𝐈𝐂 𝐁𝐀𝐆", emoji: "🛍️", multi: 0, chance: 10 },
-  { name: "𝐃𝐑𝐈𝐅𝐓𝐖𝐎𝐎𝐃", emoji: "🪵", multi: 0, chance: 5 },
+  // --- TRASH (Loss, -1X Profit) ---
+  { name: "𝐓𝐀𝐍𝐆𝐋𝐄𝐃 𝐒𝐄𝐀𝐖𝐄𝐄𝐃", emoji: "🌿", pureProfit: -1, chance: 15 },
+  { name: "𝐎𝐋𝐃 𝐁𝐎𝐎𝐓", emoji: "🥾", pureProfit: -1, chance: 10 },
+  { name: "𝐑𝐔𝐒𝐓𝐘 𝐂𝐀𝐍", emoji: "🥫", pureProfit: -1, chance: 10 },
+  { name: "𝐏𝐋𝐀𝐒𝐓𝐈𝐂 𝐁𝐀𝐆", emoji: "🛍️", pureProfit: -1, chance: 10 },
+  { name: "𝐃𝐑𝐈𝐅𝐓𝐖𝐎𝐎𝐃", emoji: "🪵", pureProfit: -1, chance: 5 },
 
-  // --- 50% FISH (1X to 25X MULTIPLIER) ---
-  { name: "𝐓𝐈𝐍𝐘 𝐒𝐇𝐑𝐈𝐌𝐏", emoji: "🦐", multi: 1, chance: 20 },
-  { name: "𝐂𝐎𝐌𝐌𝐎𝐍 𝐂𝐀𝐑𝐏", emoji: "🐟", multi: 1.5, chance: 12 },
-  { name: "𝐑𝐀𝐑𝐄 𝐏𝐔𝐅𝐅𝐄𝐑𝐅𝐈𝐒𝐇", emoji: "🐡", multi: 2, chance: 8 },
-  { name: "𝐁𝐋𝐔𝐄 𝐌𝐀𝐑𝐋𝐈𝐍", emoji: "🐠", multi: 3, chance: 5 },
-  { name: "𝐆𝐈𝐀𝐍𝐓 𝐒𝐐𝐔𝐈𝐃", emoji: "🦑", multi: 5, chance: 3 },
-  { name: "𝐆𝐑𝐄𝐀𝐓 𝐖𝐇𝐈𝐓𝐄 𝐒𝐇𝐀𝐑𝐊", emoji: "🦈", multi: 10, chance: 1.5 },
-  { name: "𝐌𝐘𝐓𝐇𝐈𝐂𝐀𝐋 𝐋𝐄𝐕𝐈𝐀𝐓𝐇𝐀𝐍", emoji: "🐉", multi: 25, chance: 0.5 }
+  // --- FISH (Break Even or Pure Profit) ---
+  { name: "𝐓𝐈𝐍𝐘 𝐒𝐇𝐑𝐈𝐌𝐏", emoji: "🦐", pureProfit: 0, chance: 20 }, // 0 = Break even
+  { name: "𝐂𝐎𝐌𝐌𝐎𝐍 𝐂𝐀𝐑𝐏", emoji: "🐟", pureProfit: 1.5, chance: 12 },
+  { name: "𝐑𝐀𝐑𝐄 𝐏𝐔𝐅𝐅𝐄𝐑𝐅𝐈𝐒𝐇", emoji: "🐡", pureProfit: 2, chance: 8 },
+  { name: "𝐁𝐋𝐔𝐄 𝐌𝐀𝐑𝐋𝐈𝐍", emoji: "🐠", pureProfit: 3, chance: 5 },
+  { name: "𝐆𝐈𝐀𝐍𝐓 𝐒𝐐𝐔𝐈𝐃", emoji: "🦑", pureProfit: 5, chance: 3 },
+  { name: "𝐆𝐑𝐄𝐀𝐓 𝐖𝐇𝐈𝐓𝐄 𝐒𝐇𝐀𝐑𝐊", emoji: "🦈", pureProfit: 10, chance: 1.5 },
+  { name: "𝐌𝐘𝐓𝐇𝐈𝐂𝐀𝐋 𝐋𝐄𝐕𝐈𝐀𝐓𝐇𝐀𝐍", emoji: "🐉", pureProfit: 25, chance: 0.5 }
 ];
 
 module.exports.config = {
   name: "fish",
-  version: "1.1.0",
+  version: "1.1.1",
   hasPermssion: 0,
   credits: "MAHIM ISLAM",
   description: "Go deep sea fishing (50% Win/Loss Chance)",
@@ -78,10 +76,9 @@ module.exports.run = async function ({ api, event, args }) {
       return api.sendMessage(`⚠️ | ${deductRes.data.message}`, event.threadID, event.messageID);
     }
 
-    // Realistic RNG Algorithm
     const roll = Math.random() * 100;
     let cumulativeChance = 0;
-    let catchResult = LOOT_TABLE[0]; // Fallback
+    let catchResult = LOOT_TABLE[0]; 
 
     for (const item of LOOT_TABLE) {
       cumulativeChance += item.chance;
@@ -91,27 +88,31 @@ module.exports.run = async function ({ api, event, args }) {
       }
     }
 
-    const multiplier = catchResult.multi;
+    const pureProfit = catchResult.pureProfit;
+    let addMultiplier = 0;
 
-    // Payout
-    if (multiplier > 0) {
-      // 1X payout refunds the original deduction + profit
-      // Note: Because the user inputs the bet, a 1.5x multi means 1.5 * bet added back.
-      const payoutAmount = validateAndNormalize(bet, multiplier).formatted;
+    // --- PURE PROFIT LOGIC FIXED ---
+    if (pureProfit === 0) {
+      addMultiplier = 1; // Add 1X just to refund the deduction (Break even)
+    } else if (pureProfit > 0) {
+      addMultiplier = pureProfit + 1; // Add the refund (1X) + the pure profit
+    }
+
+    if (addMultiplier > 0) {
+      const payoutAmount = validateAndNormalize(bet, addMultiplier).formatted;
       const addUrl = `https://mahimcraft.alwaysdata.net/economy/?type=add&uid=${uid}&quantity=${payoutAmount}&notes=Fish+Win`;
       await new Promise(resolve => setTimeout(resolve, 2000));
       await axios.get(addUrl);
     }
 
-    // Format output
     let msg = `🎣 𝐃𝐄𝐄𝐏 𝐒𝐄𝐀 𝐅𝐈𝐒𝐇𝐈𝐍𝐆 🎣\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
     msg += ` 🌊 𝘠𝘰𝘶 𝘤𝘢𝘴𝘵 𝘺𝘰𝘶𝘳 𝘭𝘪𝘯𝘦...\n`;
     msg += ` ${catchResult.emoji} 𝐘𝐨𝐮 𝐜𝐚𝐮𝐠𝐡𝐭: ${catchResult.name}!\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
 
-    if (multiplier > 1) {
-      const profitStr = validateAndNormalize(bet, multiplier).formatted;
-      msg += `🎉 𝐀𝐌𝐀𝐙𝐈𝐍𝐆 𝐂𝐀𝐓𝐂𝐇! (${multiplier}𝐗)\n➕ 💲${profitStr}`;
-    } else if (multiplier === 1) {
+    if (pureProfit > 0) {
+      const profitStr = validateAndNormalize(bet, pureProfit).formatted;
+      msg += `🎉 𝐀𝐌𝐀𝐙𝐈𝐍𝐆 𝐂𝐀𝐓𝐂𝐇! (${pureProfit}𝐗)\n➕ 💲${profitStr}`;
+    } else if (pureProfit === 0) {
       msg += `♻️ 𝐁𝐑𝐄𝐀𝐊 𝐄𝐕𝐄𝐍! (𝟏𝐗)\n➕ 💲${bet.toUpperCase()}`;
     } else {
       msg += `📛 𝐓𝐑𝐀𝐒𝐇 𝐂𝐀𝐓𝐂𝐇!\n➖ 💲${bet.toUpperCase()}`;
